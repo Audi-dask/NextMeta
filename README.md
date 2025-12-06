@@ -1,5 +1,3 @@
-# NextMeta
-
 <div align="center">
 
 <h1 style="border-bottom: none">
