@@ -74,34 +74,12 @@
 
 > 以下命令基于当前仓库结构，可根据实际部署方式调整。
 
-### 后端
-
-```bash
-cd backend
-go run cmd/server/main.go
-```
-
-### 前端
-
-```bash
-cd ..
-npm install
-npm run dev
-```
-
 > 待补充：生产环境打包与部署示例（前端构建、反向代理、二进制 / Systemd / 容器化等）。
 
 ## 🚀 使用 Docker 部署
 
 > 待补充：官方 Docker 镜像地址、示例 `docker run` / `docker-compose.yml` 配置。
 
-## 🤖 AI 助手（可选能力）
-
-> 待补充：如后续接入 LLM（OpenAI / 本地大模型）进行 SQL 优化、文本转 SQL 等能力，可在此补充：
->
-> - 文本转 SQL 示例  
-> - SQL 优化建议展示方式  
-> - 安全边界与审计策略
 
 ## 🔖 自动 SQL 检查与规则引擎
 
