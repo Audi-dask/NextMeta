@@ -1,0 +1,64 @@
+services:
+  # NextMeta 应用服务 (生产环境 - 直接拉取镜像)
+  nextmeta-app:
+    image: dbak321/nextmeta:v1.0.0
+    container_name: nextmeta
+    restart: unless-stopped
+    ports:
+      - "8080:8080"  # 应用端口
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro     # 生产环境配置文件 (去掉 .example)
+      - nextmeta-data:/data                   # 数据持久化目录
+    environment:
+      - TZ=Asia/Shanghai                      # 时区设置
+    depends_on:
+      mysql:
+        condition: service_healthy            # 等待 MySQL 健康检查通过
+    networks:
+      - nextmeta-net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MySQL 数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: nextmeta-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-nextmeta2024}  # 默认密码
+      - MYSQL_DATABASE=nextmeta                                    # 数据库名
+      - TZ=Asia/Shanghai                                           # 时区设置
+    volumes:
+      - mysql-data:/var/lib/mysql                                 # 数据持久化
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro       # 数据库初始化脚本
+    # 生产环境通常不建议将数据库端口暴露到公网，除非有防火墙限制
+    # ports:
+    #   - "3306:3306"
+    networks:
+      - nextmeta-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-nextmeta2024}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+
+# 数据卷定义
+volumes:
+  nextmeta-data:
+    driver: local
+  mysql-data:
+    driver: local
+
+# 网络定义
+networks:
+  nextmeta-net:
+    driver: bridge

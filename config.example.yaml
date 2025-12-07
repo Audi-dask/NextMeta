@@ -1,0 +1,31 @@
+server:
+  port: ":8080" # 服务端口
+
+database:
+  # 数据库连接配置
+  host: "mysql"                  # 数据库连接地址
+  port: "3306"                   # 数据库端口
+  user: "root"                   # 数据库用户名
+  password: "nextmeta2024"       # 数据库密码（请修改为强密码）
+  dbname: "nextmeta"             # 数据库名称
+
+
+# ========================================
+# LDAP 配置（可选功能）
+# 如果不需要 LDAP 认证，请保持以下内容为注释状态
+# 后端代码会自动检测 LDAP 配置是否存在，不会因未配置而报错
+# ========================================
+# ldap:
+#   url: "ldap://your-ldap-server:389"           # LDAP 服务器地址
+#   base_dn: "dc=example,dc=com"                  # 基础 DN
+#   group_base_dn: "ou=groups,dc=example,dc=com" # 组基础 DN
+#   bind_dn: "cn=admin,dc=example,dc=com"        # 绑定用户 DN
+#   bind_pass: "your-ldap-password"               # 绑定用户密码
+#   user_filter: "(objectClass=person)"           # 用户过滤规则
+#   group_filter: "(objectClass=*)" # 组过滤规则 (&(objectClass=*)(!(cn=filter*)))
+#   
+#   # 字段映射配置
+#   mapping:
+#     username: "uid"          # 用户名对应的 LDAP 属性
+#     real_name: "cn"          # 显示名对应的 LDAP 属性
+#     email: "mail"            # 邮箱对应的 LDAP 属性

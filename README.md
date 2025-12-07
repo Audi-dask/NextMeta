@@ -102,15 +102,68 @@
 
 ![通知设置](./img/notification-settings.png)
 
-## ⚙️ 安装
+## ⚙️ 部署指南
 
-> 以下命令基于当前仓库结构，可根据实际部署方式调整。
+本项目推荐使用 Docker Compose 进行一键部署，快速构建包含应用服务与数据库的完整环境。
 
-> 待补充：生产环境打包与部署示例（前端构建、反向代理、二进制 / Systemd / 容器化等）。
+### 1. 环境准备
+- **Docker**: 建议版本 20.10+
+- **Docker Compose**: 建议版本 2.0+
 
-## 🚀 使用 Docker 部署
+### 2. 获取代码与配置
+```bash
+# 获取项目代码
+git clone https://github.com/dbak321/NextMeta.git
+cd NextMeta
 
-> 待补充：官方 Docker 镜像地址、示例 `docker run` / `docker-compose.yml` 配置。
+# 初始化配置文件
+cp config.example.yaml config.yaml
+```
+
+### 3. 配置说明 (`config.yaml`)
+默认配置即可直接运行，关键配置项说明如下：
+- **server.port**: 应用服务端口 (默认 8080)
+- **database**: MySQL 连接信息 (默认连接 docker-compose 内的 mysql 服务)
+- **ldap**: (可选) 企业 LDAP 认证配置，如无需对接可保持注释状态
+
+> **注意**: 如果修改了 `config.yaml` 中的数据库密码，请同步修改 `docker-compose.prod.yaml` 中的 `MYSQL_ROOT_PASSWORD` 环境变量。
+
+### 4. 启动服务
+使用生产环境配置启动服务：
+
+```bash
+# 后台启动服务
+docker-compose -f docker-compose.prod.yaml up -d
+```
+
+启动后，容器会自动执行以下操作：
+1. **Database Ready**: 等待 MySQL 服务启动并就绪。
+2. **Schema Init**: 自动执行 `init.sql` 初始化数据库表结构与默认数据。
+3. **App Start**: 启动 NextMeta 后端服务。
+
+### 5. 访问与验证
+等待约 10-30 秒服务启动完成后，访问浏览器：
+
+- **访问地址**: `http://localhost:8080`
+- **默认管理员账号**:
+  - 用户名: `NextMeta`
+  - 密码: `password123` (建议登录后立即修改)
+
+---
+
+## �️ 常用运维命令
+
+```bash
+# 查看服务日志
+docker-compose -f docker-compose.prod.yaml logs -f
+
+# 停止服务
+docker-compose -f docker-compose.prod.yaml down
+
+# 更新镜像并重启
+docker-compose -f docker-compose.prod.yaml pull
+docker-compose -f docker-compose.prod.yaml up -d
+```
 
 
 ## 🔖 自动 SQL 检查与规则引擎
@@ -159,14 +212,14 @@ NextMeta 内置自动 SQL 检查能力，通过规则引擎对工单和在线 SQ
 - [x] **数据源配置优化**: “分组”字段改为非必填；增加“连接超时”和“SQL执行超时”的数值范围限制验证。
 
 ### 🟢 P2: Low Priority (UI/UX & Polish)
-- [ ] **仪表盘趋势图**: 将“活跃统计”改为展示“SQL查询趋势”和“工单数量趋势”图表。
-- [ ] **表大小统计**: 在 SQL 查询的表结构查看中，增加表大小（数据量/存储大小）的展示。
-- [ ] **工单详情页布局**: 顶部展示固定操作按钮和提示文案；底部展示 SQL 详情（默认折叠）。
-- [ ] **工单审核人展示**: 在“我的工单”列表中，增加显示当前工单的审核人信息。
-- [ ] **工单创建入口优化**: 在“我的工单”页面移除“创建新工单”按钮，统一入口。
-- [ ] **SQL 查询标签页限制**: 限制 SQL 查询页面的标签页数量最多为 10 个。
-- [ ] **导出图标优化**: SQL 查询页面的导出功能图标改为标准的导出图标。
-- [ ] **移除执行信息提示**: 移除 SQL 查询界面中多余的“执行信息”提示/Tab。
+- [x] **仪表盘趋势图**: 将“活跃统计”改为展示“SQL查询趋势”和“工单数量趋势”图表。
+- [x] **表大小统计**: 在 SQL 查询的表结构查看中，增加表大小（数据量/存储大小）的展示。
+- [x] **工单详情页布局**: 顶部展示固定操作按钮和提示文案；底部展示 SQL 详情（默认折叠）。
+- [x] **工单审核人展示**: 在“我的工单”列表中，增加显示当前工单的审核人信息。
+- [x] **工单创建入口优化**: 在“我的工单”页面移除“创建新工单”按钮，统一入口。
+- [x] **SQL 查询标签页限制**: 限制 SQL 查询页面的标签页数量最多为 10 个。
+- [x] **导出图标优化**: SQL 查询页面的导出功能图标改为标准的导出图标。
+- [x] **移除执行信息提示**: 移除 SQL 查询界面中多余的“执行信息”提示/Tab。
 
 ## 📦 许可证与联系方式
 
