@@ -113,7 +113,8 @@
 ### 2. 获取代码与配置
 ```bash
 # 获取项目代码
-git clone https://github.com/dbak321/NextMeta.git
+git clone https://github.com/Audi-dask/NextMeta.git
+
 cd NextMeta
 
 # 初始化配置文件
