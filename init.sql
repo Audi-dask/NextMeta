@@ -1,12 +1,11 @@
 -- ========================================
 -- NextMeta 数据库初始化脚本
--- 生成时间: 2025-12-07 14:23:30
+-- 生成时间: 2025-12-08
 -- 用途: Docker 部署的数据库初始化
 -- ========================================
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
 
 -- ----------------------------
 -- Table structure for audit_logs
@@ -28,6 +27,12 @@ CREATE TABLE `audit_logs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
+-- Records of audit_logs
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
 -- Table structure for audit_rules
 -- ----------------------------
 DROP TABLE IF EXISTS `audit_rules`;
@@ -47,7 +52,36 @@ CREATE TABLE `audit_rules` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_audit_rules_code` (`code`),
   KEY `idx_audit_rules_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of audit_rules
+-- ----------------------------
+BEGIN;
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (1, '2025-12-04 18:01:36.509', '2025-12-04 18:30:47.007', NULL, 'ERR.000', 'SQL语法错误', 'SQL语法必须正确', 'error', 'syntax', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (2, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ERR.001', 'DDL执行错误', 'DDL语句在虚拟环境中执行失败', 'error', 'syntax', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (3, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ALI.001', '建议使用AS关键字', '在列或表别名(如\"tbl AS alias\")中, 明确使用 AS 关键字比隐含别名(如\"tbl alias\")更易懂', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (4, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ALI.002', '不建议给列起别名', '不建议对列使用别名', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (5, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ALI.003', '别名与原名相同', '别名与原名相同，没有意义', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (6, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ARG.001', '前缀通配符LIKE', 'LIKE查询不建议使用前缀通配符(\'%abc\')', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (7, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ARG.002', '全通配符LIKE', 'LIKE查询不建议使用全通配符(\'%\')', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (8, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ARG.003', '隐式类型转换', '检测到隐式类型转换，可能导致无法使用索引', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (9, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'ARG.008', '使用!=或<>操作符', '不建议使用!=或<>操作符，可能导致无法使用索引', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (10, '2025-12-04 18:01:36.509', '2025-12-04 19:23:51.733', NULL, 'CLA.001', '无WHERE条件的SELECT', 'SELECT语句必须包含WHERE条件', 'warning', 'heuristic', 1, '', '');
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (11, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'CLA.002', 'ORDER BY RAND()', '禁止使用ORDER BY RAND()', 'error', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (12, '2025-12-04 18:01:36.509', '2025-12-04 20:03:08.460', NULL, 'CLA.003', '大OFFSET翻页', 'LIMIT OFFSET过大，建议优化', 'error', 'heuristic', 1, '', '');
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (13, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'CLA.004', 'GROUP BY常量', 'GROUP BY常量没有意义', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (14, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'CLA.005', 'ORDER BY常量', 'ORDER BY常量没有意义', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (15, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'CLA.011', '建表未指定注释', '建议为表和列添加注释', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (16, '2025-12-04 18:01:36.509', '2025-12-04 18:11:50.867', NULL, 'CLA.013', 'DML语句缺少WHERE', 'UPDATE/DELETE语句必须包含WHERE条件', 'error', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (17, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'COL.001', 'SELECT *', '不建议使用SELECT *，请指定具体列', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (18, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'COL.002', 'INSERT未指定列', 'INSERT语句建议显式指定列名', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (19, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'COL.010', '使用了TEXT/BLOB类型', '不建议使用TEXT/BLOB类型', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (20, '2025-12-04 18:01:36.509', '2025-12-04 18:01:36.509', NULL, 'KWR.003', '使用OR条件', '建议将OR改写为IN或UNION', 'warning', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (21, '2025-12-04 18:01:36.509', '2025-12-05 19:47:18.995', NULL, 'FUN.001', '列上使用函数', '在WHERE条件列上使用函数会导致索引失效', 'error', 'heuristic', 1, '', '');
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (22, '2025-12-04 18:30:37.891', '2025-12-04 18:30:37.891', NULL, 'SEC.005', '禁止 DROP TABLE', '生产环境中禁止直接执行 DROP TABLE 操作', 'error', 'heuristic', 1, NULL, NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`) VALUES (23, '2025-12-04 18:30:37.934', '2025-12-04 18:30:37.934', NULL, 'SEC.006', '禁止 DROP DATABASE', '生产环境中禁止直接执行 DROP DATABASE 操作', 'error', 'heuristic', 1, NULL, NULL);
+COMMIT;
 
 -- ----------------------------
 -- Table structure for data_source_masking_rules
@@ -67,6 +101,12 @@ CREATE TABLE `data_source_masking_rules` (
   KEY `idx_data_source_masking_rules_data_source_id` (`data_source_id`),
   CONSTRAINT `fk_data_sources_masking_rules` FOREIGN KEY (`data_source_id`) REFERENCES `data_sources` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of data_source_masking_rules
+-- ----------------------------
+BEGIN;
+COMMIT;
 
 -- ----------------------------
 -- Table structure for data_sources
@@ -91,7 +131,13 @@ CREATE TABLE `data_sources` (
   `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'active' COMMENT '状态(active/inactive)',
   PRIMARY KEY (`id`),
   KEY `idx_data_sources_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of data_sources
+-- ----------------------------
+BEGIN;
+COMMIT;
 
 -- ----------------------------
 -- Table structure for group_approvers
@@ -109,6 +155,12 @@ CREATE TABLE `group_approvers` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
+-- Records of group_approvers
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
 -- Table structure for group_datasources
 -- ----------------------------
 DROP TABLE IF EXISTS `group_datasources`;
@@ -122,6 +174,12 @@ CREATE TABLE `group_datasources` (
   PRIMARY KEY (`id`),
   KEY `idx_group_datasources_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of group_datasources
+-- ----------------------------
+BEGIN;
+COMMIT;
 
 -- ----------------------------
 -- Table structure for groups
@@ -139,7 +197,14 @@ CREATE TABLE `groups` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_groups_name` (`name`),
   KEY `idx_groups_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of groups
+-- ----------------------------
+BEGIN;
+INSERT INTO `groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `name`, `description`, `source`, `dn`) VALUES (1, '2025-12-03 17:52:57.616', '2025-12-03 17:52:57.616', NULL, 'NextMeta_Groups', '', 'local', '');
+COMMIT;
 
 -- ----------------------------
 -- Table structure for sql_snippets
@@ -157,6 +222,12 @@ CREATE TABLE `sql_snippets` (
   KEY `idx_sql_snippets_deleted_at` (`deleted_at`),
   KEY `idx_sql_snippets_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of sql_snippets
+-- ----------------------------
+BEGIN;
+COMMIT;
 
 -- ----------------------------
 -- Table structure for sql_tickets
@@ -183,6 +254,12 @@ CREATE TABLE `sql_tickets` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
+-- Records of sql_tickets
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
 -- Table structure for system_settings
 -- ----------------------------
 DROP TABLE IF EXISTS `system_settings`;
@@ -194,6 +271,19 @@ CREATE TABLE `system_settings` (
   `updated_at` datetime(3) DEFAULT NULL,
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of system_settings
+-- ----------------------------
+BEGIN;
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('global_sql_limit', '1000', '全局 SQL 查询行数限制 (Global SQL Query Limit)', '2025-12-05 15:39:59.497', '2025-12-06 12:08:55.922');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('key', 'notification_template_result', '', '2025-12-06 14:33:29.147', '2025-12-06 14:37:55.131');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_template_pending', '【SQL审计平台】您有新的工单待审批\n工单标题: {title}\n工单类型: {type}\n提交人: {creator}\n提交时间: {created_at}', '待审批通知模版 (Pending Notification Template)', '2025-12-06 14:20:19.374', '2025-12-06 14:43:03.207');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_template_result', '【SQL审计平台】工单审批结果通知\n工单标题: {title}\n审批状态: {status}\n处理人: {operator}\n处理时间: {updated_at}\n备注: {remark}', '审批结果通知模版 (Result Notification Template)', '2025-12-06 14:20:19.426', '2025-12-06 14:43:03.237');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_webhook', 'https://open.feishu.cn/open-apis/bot/v2/hook/', '通知 Webhook 地址 (Notification Webhook URL)', '2025-12-06 14:20:19.340', '2025-12-06 14:43:03.177');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ticket_affected_rows_threshold', '1000', '', '2025-12-06 11:32:59.893', '2025-12-06 12:08:55.952');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('value', '【SQL审计平台】工单审批结果通知\n工单标题: {title}\n审批状态: {status}\n处理人: {operator}\n处理时间: {updated_at}\n备注: {remark}', '', '2025-12-06 14:33:29.182', '2025-12-06 14:37:55.161');
+COMMIT;
 
 -- ----------------------------
 -- Table structure for ticket_approvals
@@ -218,6 +308,12 @@ CREATE TABLE `ticket_approvals` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
+-- Records of ticket_approvals
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
 -- Table structure for user_groups
 -- ----------------------------
 DROP TABLE IF EXISTS `user_groups`;
@@ -230,7 +326,14 @@ CREATE TABLE `user_groups` (
   `group_id` bigint unsigned NOT NULL COMMENT '组ID',
   PRIMARY KEY (`id`),
   KEY `idx_user_groups_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Records of user_groups
+-- ----------------------------
+BEGIN;
+INSERT INTO `user_groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `group_id`) VALUES (1, '2025-12-08 11:02:01.000', '2025-12-08 11:02:01.000', NULL, 1, 1);
+COMMIT;
 
 -- ----------------------------
 -- Table structure for users
@@ -251,72 +354,13 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_users_username` (`username`),
   KEY `idx_users_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-
--- ========================================
--- 初始数据
--- ========================================
-
-
--- 默认管理员账号: NextMeta / password123
-INSERT INTO `users` (`id`, `created_at`, `updated_at`, `deleted_at`, `username`, `password`, `real_name`, `email`, `role`, `status`, `source`)
-VALUES (1, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'NextMeta', '$2b$12$MZlhUO1LQf16ZOtGtNO.jebUgXQFW1U9fm7jLINOHaHTKvXXcbU2K', '系统管理员', 'admin@nextmeta.com', 'admin', 1, 'local');
-
-
--- 默认审计规则
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (1, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ERR.000', 'SQL语法错误', 'SQL语法必须正确', 'error', 'syntax', 1, 'SQL语句存在语法错误，无法被数据库解析。', 'SELEC * FROM table');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (2, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ERR.001', 'DDL执行错误', 'DDL语句在虚拟环境中执行失败', 'error', 'syntax', 1, 'DDL语句在模拟执行时失败，可能是因为表不存在或权限不足。', 'ALTER TABLE non_existent_table ADD COLUMN c1 INT');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (3, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ALI.001', '建议使用AS关键字', '在列或表别名中, 明确使用 AS 关键字比隐含别名更易懂', 'warning', 'heuristic', 1, '使用 AS 关键字可以提高 SQL 的可读性，避免歧义。', 'SELECT col1 AS c1 FROM table AS t');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (4, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ALI.003', '别名与原名相同', '别名与原名相同，没有意义', 'warning', 'heuristic', 1, '别名如果和原名一样，则是多余的。', 'SELECT col1 AS col1 FROM table');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (5, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ARG.001', '前缀通配符LIKE', 'LIKE查询不建议使用前缀通配符(\'%abc\')', 'warning', 'heuristic', 1, '前缀通配符会导致索引失效，进行全表扫描。', 'SELECT * FROM table WHERE col LIKE \'%abc\'');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (6, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ARG.002', '全通配符LIKE', 'LIKE查询不建议使用全通配符(\'%\')', 'warning', 'heuristic', 1, '全通配符没有过滤意义，且效率极低。', 'SELECT * FROM table WHERE col LIKE \'%\'');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (7, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ARG.003', '隐式类型转换', '检测到隐式类型转换，可能导致无法使用索引', 'warning', 'heuristic', 1, '列类型与比较值类型不一致会导致隐式转换，从而使索引失效。', 'SELECT * FROM table WHERE varchar_col = 123');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (8, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'ARG.008', '使用!=或<>操作符', '不建议使用!=或<>操作符，可能导致无法使用索引', 'warning', 'heuristic', 1, '不等号查询通常无法使用索引。', 'SELECT * FROM table WHERE col != 1');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (9, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'CLA.001', '无WHERE条件的SELECT', 'SELECT语句必须包含WHERE条件', 'error', 'heuristic', 1, '全表扫描会消耗大量资源，甚至拖垮数据库。', 'SELECT * FROM table');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (10, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'CLA.002', 'ORDER BY RAND()', '禁止使用ORDER BY RAND()', 'error', 'heuristic', 1, 'ORDER BY RAND() 效率极低，不适合大数据量场景。', 'SELECT * FROM table ORDER BY RAND()');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (11, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'CLA.003', '大OFFSET翻页', 'LIMIT OFFSET过大，建议优化', 'warning', 'heuristic', 1, '大 OFFSET 会导致数据库扫描大量无用数据。', 'SELECT * FROM table LIMIT 100000, 10');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (12, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'CLA.011', '建表未指定注释', '建议为表和列添加注释', 'warning', 'heuristic', 1, '注释有助于理解表结构和业务含义。', 'CREATE TABLE t (id INT) COMMENT \'test table\'');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (13, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'CLA.013', 'DML语句缺少WHERE', 'UPDATE/DELETE语句必须包含WHERE条件', 'error', 'heuristic', 1, '没有 WHERE 条件的 UPDATE/DELETE 会影响全表数据，极其危险。', 'DELETE FROM table');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (14, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'COL.001', 'SELECT *', '不建议使用SELECT *，请指定具体列', 'warning', 'heuristic', 1, 'SELECT * 会查询不需要的列，增加网络和IO开销，且表结构变更可能导致应用报错。', 'SELECT * FROM table');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (15, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'COL.002', 'INSERT未指定列', 'INSERT语句建议显式指定列名', 'warning', 'heuristic', 1, '显式指定列名可以避免表结构变更导致的插入错误。', 'INSERT INTO table VALUES (1, \'a\')');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (16, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'COL.010', '使用了TEXT/BLOB类型', '不建议使用TEXT/BLOB类型', 'warning', 'heuristic', 1, '大字段会影响查询性能和磁盘空间。', 'CREATE TABLE t (c TEXT)');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (17, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'KWR.003', '使用OR条件', '建议将OR改写为IN或UNION', 'warning', 'heuristic', 1, 'OR 条件可能导致索引失效。', 'SELECT * FROM table WHERE a=1 OR a=2');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (18, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'FUN.001', '列上使用函数', '在WHERE条件列上使用函数会导致索引失效', 'error', 'heuristic', 1, '对索引列进行函数运算会导致无法使用索引。', 'SELECT * FROM table WHERE DATE(create_time) = \'2023-01-01\'');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (19, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'SEC.005', '禁止 DROP TABLE', '生产环境中禁止直接执行 DROP TABLE 操作', 'error', 'heuristic', 1, 'DROP TABLE 是高危操作，可能导致数据丢失。', 'DROP TABLE users');
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`)
-VALUES (20, '2025-12-07 14:23:30', '2025-12-07 14:23:30', NULL, 'SEC.006', '禁止 DROP DATABASE', '生产环境中禁止直接执行 DROP DATABASE 操作', 'error', 'heuristic', 1, 'DROP DATABASE 是极高危操作，可能导致整个库数据丢失。', 'DROP DATABASE test_db');
-
--- 默认系统设置
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`)
-VALUES ('global_sql_limit', '1000', '全局 SQL 查询行数限制 (Global SQL Query Limit)', '2025-12-07 14:23:30', '2025-12-07 14:23:30');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`)
-VALUES ('ticket_affected_rows_threshold', '5000', '工单影响行数安全阈值 (Ticket Affected Rows Safety Threshold)', '2025-12-07 14:23:30', '2025-12-07 14:23:30');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`)
-VALUES ('notification_webhook', '', '通知 Webhook 地址 (Notification Webhook URL)', '2025-12-07 14:23:30', '2025-12-07 14:23:30');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`)
-VALUES ('notification_template_pending', '【SQL审计平台】您有新的工单待审批\n工单标题: {title}\n工单类型: {type}\n提交人: {creator}\n提交时间: {created_at}', '待审批通知模版 (Pending Notification Template)', '2025-12-07 14:23:30', '2025-12-07 14:23:30');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`)
-VALUES ('notification_template_result', '【SQL审计平台】工单审批结果通知\n工单标题: {title}\n审批状态: {status}\n处理人: {operator}\n处理时间: {updated_at}\n备注: {remark}', '审批结果通知模版 (Result Notification Template)', '2025-12-07 14:23:30', '2025-12-07 14:23:30');
-
+-- ----------------------------
+-- Records of users
+-- ----------------------------
+BEGIN;
+INSERT INTO `users` (`id`, `created_at`, `updated_at`, `deleted_at`, `username`, `password`, `real_name`, `email`, `role`, `status`, `source`) VALUES (1, '2025-12-03 14:38:26.235', '2025-12-07 12:30:11.085', NULL, 'NextMeta', '$2a$10$mrEhG98f0rIsPJ/8lg4Hde5mQCK.YK8k6T.gbtTmsvUajINHn8.WC', 'NextMeta', 'test@NextMetacom.com', 'admin', 1, 'local');
+COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
