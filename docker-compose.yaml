@@ -1,7 +1,7 @@
 services:
   # NextMeta 应用服务 (生产环境 - 直接拉取镜像)
   nextmeta:
-    image: ccr.ccs.tencentyun.com/audi-dask/nextmeta:20251208-195631
+    image: ccr.ccs.tencentyun.com/audi-dask/nextmeta:20251209-165756
     container_name: nextmeta
     restart: unless-stopped
     ports:
