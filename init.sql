@@ -1,6 +1,6 @@
 -- ========================================
 -- NextMeta 数据库初始化脚本
--- 生成时间: 2025-12-08
+-- 生成时间: 08/12/2025 19:46:20
 -- 用途: Docker 部署的数据库初始化
 -- ========================================
 
@@ -131,7 +131,7 @@ CREATE TABLE `data_sources` (
   `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'active' COMMENT '状态(active/inactive)',
   PRIMARY KEY (`id`),
   KEY `idx_data_sources_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of data_sources
@@ -197,7 +197,7 @@ CREATE TABLE `groups` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_groups_name` (`name`),
   KEY `idx_groups_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of groups
@@ -247,6 +247,7 @@ CREATE TABLE `sql_tickets` (
   `status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending' COMMENT '状态:pending/approved/rejected/executed/failed',
   `execute_result` text COLLATE utf8mb4_general_ci COMMENT '执行结果',
   `is_force` tinyint(1) DEFAULT '0' COMMENT '是否强制提交',
+  `database` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '目标数据库名',
   PRIMARY KEY (`id`),
   KEY `idx_sql_tickets_deleted_at` (`deleted_at`),
   KEY `fk_sql_tickets_creator` (`creator_id`),
@@ -276,12 +277,15 @@ CREATE TABLE `system_settings` (
 -- Records of system_settings
 -- ----------------------------
 BEGIN;
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('global_sql_limit', '1000', '全局 SQL 查询行数限制 (Global SQL Query Limit)', '2025-12-05 15:39:59.497', '2025-12-06 12:08:55.922');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('', '【SQL审计平台】工单审批结果通知\n工单标题: {title}\n审批状态: {status}\n处理人: {operator}\n处理时间: {updated_at}\n备注: {remark}', '审批结果通知模版 (Result Notification Template)', '2025-12-08 19:05:14.293', '2025-12-08 19:05:14.293');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('global_sql_limit', '1000', '全局 SQL 查询行数限制 (Global SQL Query Limit)', '2025-12-05 15:39:59.497', '2025-12-08 19:33:39.026');
 INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('key', 'notification_template_result', '', '2025-12-06 14:33:29.147', '2025-12-06 14:37:55.131');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_auto_sync_cron', '0 * * * *', '', '2025-12-08 19:02:31.242', '2025-12-08 19:02:40.297');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_auto_sync_enabled', 'false', '', '2025-12-08 19:02:31.159', '2025-12-08 19:33:39.165');
 INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_template_pending', '【SQL审计平台】您有新的工单待审批\n工单标题: {title}\n工单类型: {type}\n提交人: {creator}\n提交时间: {created_at}', '待审批通知模版 (Pending Notification Template)', '2025-12-06 14:20:19.374', '2025-12-06 14:43:03.207');
 INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_template_result', '【SQL审计平台】工单审批结果通知\n工单标题: {title}\n审批状态: {status}\n处理人: {operator}\n处理时间: {updated_at}\n备注: {remark}', '审批结果通知模版 (Result Notification Template)', '2025-12-06 14:20:19.426', '2025-12-06 14:43:03.237');
 INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_webhook', 'https://open.feishu.cn/open-apis/bot/v2/hook/', '通知 Webhook 地址 (Notification Webhook URL)', '2025-12-06 14:20:19.340', '2025-12-06 14:43:03.177');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ticket_affected_rows_threshold', '1000', '', '2025-12-06 11:32:59.893', '2025-12-06 12:08:55.952');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ticket_affected_rows_threshold', '1000', '', '2025-12-06 11:32:59.893', '2025-12-08 19:33:39.086');
 INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('value', '【SQL审计平台】工单审批结果通知\n工单标题: {title}\n审批状态: {status}\n处理人: {operator}\n处理时间: {updated_at}\n备注: {remark}', '', '2025-12-06 14:33:29.182', '2025-12-06 14:37:55.161');
 COMMIT;
 
@@ -332,7 +336,7 @@ CREATE TABLE `user_groups` (
 -- Records of user_groups
 -- ----------------------------
 BEGIN;
-INSERT INTO `user_groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `group_id`) VALUES (1, '2025-12-08 11:02:01.000', '2025-12-08 11:02:01.000', NULL, 1, 1);
+INSERT INTO `user_groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `group_id`) VALUES (1, '2025-12-08 19:36:32.807', '2025-12-08 19:36:32.807', NULL, 1, 1);
 COMMIT;
 
 -- ----------------------------
@@ -351,16 +355,17 @@ CREATE TABLE `users` (
   `role` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'user' COMMENT '角色(admin/user)',
   `status` tinyint DEFAULT '1' COMMENT '状态(1:正常, 2:禁用)',
   `source` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'local' COMMENT '来源(local/ldap)',
+  `dn` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'LDAP DN',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_users_username` (`username`),
   KEY `idx_users_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
 BEGIN;
-INSERT INTO `users` (`id`, `created_at`, `updated_at`, `deleted_at`, `username`, `password`, `real_name`, `email`, `role`, `status`, `source`) VALUES (1, '2025-12-03 14:38:26.235', '2025-12-07 12:30:11.085', NULL, 'NextMeta', '$2a$10$mrEhG98f0rIsPJ/8lg4Hde5mQCK.YK8k6T.gbtTmsvUajINHn8.WC', 'NextMeta', 'test@NextMetacom.com', 'admin', 1, 'local');
+INSERT INTO `users` (`id`, `created_at`, `updated_at`, `deleted_at`, `username`, `password`, `real_name`, `email`, `role`, `status`, `source`, `dn`) VALUES (1, '2025-12-03 14:38:26.235', '2025-12-07 12:30:11.085', NULL, 'NextMeta', '$2a$10$mrEhG98f0rIsPJ/8lg4Hde5mQCK.YK8k6T.gbtTmsvUajINHn8.WC', 'NextMeta', 'test@NextMetacom.com', 'admin', 1, 'local', NULL);
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
