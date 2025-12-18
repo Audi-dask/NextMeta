@@ -23,7 +23,7 @@
 - **系统设置与通知**: 集中配置全局限制、安全阈值及模版化 Webhook 通知，方便接入企业自有告警 / 通知渠道。
 
 ![Dashboard 总览](./img/dashboard-overview.png)
-
+![SQL查询](./img/sql-quick-preview.png)
 ### 解决痛点问题
 
 - **多渠道通知集成**：对接了国内主流飞书、钉钉、企业微信 Robot，自定义通知模版与告警内容，满足企业内部多场景通知需求。
