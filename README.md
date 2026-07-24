@@ -67,4 +67,4 @@
 
 > 扫码添加微信，加入 NextMeta 交流群（产品更新、问题反馈与使用交流）：
 
-![NextMeta 微信交流群](./img/img/IMG_3377.PNG)
+![NextMeta 微信交流群](./img/IMG_3377.PNG)
