@@ -1,6 +1,6 @@
 services:
   nextmeta:
-    image: ccr.ccs.tencentyun.com/dbak/nextmeta:latest
+    image: ccr.ccs.tencentyun.com/dbak/nextmeta:latest # 最新版本20260808-222938
     container_name: nextmeta
     restart: unless-stopped
     ports:

@@ -11,7 +11,7 @@
  Target Server Version : 80046 (8.0.46)
  File Encoding         : 65001
 
- Date: 23/07/2026 14:47:21
+ Date: 08/08/2026 22:19:22
 */
 
 SET NAMES utf8mb4;
@@ -29,14 +29,14 @@ CREATE TABLE `audit_logs` (
   `user_id` bigint unsigned NOT NULL COMMENT '操作用户ID',
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作用户名',
   `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作类型',
+  `query_session_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '查询说明会话ID',
   `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '客户端IP',
   `details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '详情',
   `status` tinyint DEFAULT '1' COMMENT '状态(1:成功, 0:失败)',
   `data_source_id` bigint unsigned DEFAULT '0' COMMENT '数据源ID',
-  `data_source` varchar(100) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '数据源名称',
-  `database` varchar(100) COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '数据库名',
-  `query_session_id` varchar(36) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '查询说明会话ID，普通操作日志可为空',
-  `sql_content` text COLLATE utf8mb4_general_ci COMMENT 'SQL内容',
+  `data_source` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '数据源名称',
+  `database` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '' COMMENT '数据库名',
+  `sql_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT 'SQL内容',
   `duration_ms` bigint DEFAULT '0' COMMENT '执行耗时毫秒',
   `row_count` bigint DEFAULT '0' COMMENT '查询返回行数',
   `exported` tinyint(1) DEFAULT '0' COMMENT '是否导出',
@@ -68,7 +68,7 @@ CREATE TABLE `audit_rules` (
   `enabled` tinyint(1) DEFAULT '1',
   `explanation` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `example` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `config` text COLLATE utf8mb4_general_ci,
+  `config` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_audit_rules_code` (`code`),
   KEY `idx_audit_rules_deleted_at` (`deleted_at`)
@@ -82,7 +82,6 @@ INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (25, '2026-05-12 08:40:51.930', '2026-05-12 08:40:51.930', NULL, 'NM_SQL_EMPTY_STATEMENT', '空SQL语句', 'SQL内容不能为空', 'error', 'common', 1, '提交审核的 SQL 内容不能为空。', '', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (26, '2026-05-12 08:40:51.942', '2026-05-12 08:40:51.942', NULL, 'NM_SQL_ONLY_DDL_DML', '仅允许DDL或DML', '工单SQL仅允许DDL或DML语句', 'error', 'common', 1, '工单流程只处理 DDL/DML 变更类 SQL，查询窗口不使用该规则。', 'SELECT * FROM users', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (27, '2026-05-12 08:40:51.951', '2026-05-12 08:40:51.951', NULL, 'NM_SQL_TICKET_TYPE_MATCH', '工单类型与SQL类型匹配', 'DDL和DML不允许混合执行', 'error', 'common', 1, 'DDL 工单只能包含 DDL，DML 工单只能包含 DML。', 'CREATE TABLE t(id INT); INSERT INTO t(id) VALUES (1);', NULL);
-INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (83, '2026-07-23 00:00:00.000', '2026-07-23 00:00:00.000', NULL, 'NM_SQL_CROSS_DATABASE_FORBIDDEN', '禁止跨数据库执行', 'SQL只能访问工单选择的目标数据库', 'warning', 'common', 1, '当工单选择数据库 db_a 时，SQL 中显式操作 db_b.table_name 这类其他库对象会触发提示。当前默认只警告不阻断；如需严格限制，可在审核规则管理页面将严重级别调整为 error。开启跨库后，部分动态元数据审核仍以工单选择库为主。', '工单选择 db_a，但提交 SQL：UPDATE db_b.users SET status = 0 WHERE id = 1;', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (28, '2026-05-12 08:40:51.957', '2026-05-12 08:40:51.957', NULL, 'NM_DML_UPDATE_REQUIRE_WHERE', 'UPDATE必须包含WHERE', 'UPDATE语句必须包含WHERE条件', 'error', 'DML', 1, '避免无条件 UPDATE 影响整表数据。', 'UPDATE users SET name = \'test\'', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (29, '2026-05-12 08:40:51.962', '2026-05-14 12:25:48.914', NULL, 'NM_DML_DELETE_REQUIRE_WHERE', 'DELETE必须包含WHERE', 'DELETE语句必须包含WHERE条件', 'error', 'DML', 1, '避免无条件 DELETE 删除整表数据。', 'DELETE FROM users', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (30, '2026-05-12 08:40:51.965', '2026-05-12 08:40:51.965', NULL, 'NM_DML_UPDATE_DELETE_FORBID_LIMIT', 'UPDATE/DELETE禁止LIMIT', 'UPDATE或DELETE语句禁止使用LIMIT', 'error', 'DML', 1, 'LIMIT 可能导致变更范围不稳定，建议使用明确 WHERE 条件。', 'DELETE FROM users WHERE status = 0 LIMIT 10', NULL);
@@ -136,6 +135,7 @@ INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (80, '2026-05-14 15:04:54.860', '2026-07-22 16:05:50.000', NULL, 'NM_DML_UPDATE_DELETE_JOIN_RISK', '禁止多表UPDATE/DELETE', '单条UPDATE/DELETE不允许包含多表JOIN或多目标写入', 'error', 'DML', 1, '当前动态审核无法可靠确认多表写入中的目标表、字段归属、索引使用和隐式类型转换，因此单条多表 UPDATE/DELETE 直接阻断。一个工单包含多条单表 UPDATE/DELETE 不受影响。', 'UPDATE users u JOIN orders o ON u.id = o.user_id SET u.status = 1 WHERE o.order_no = \'x\'', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (81, '2026-05-14 15:04:54.860', '2026-05-14 15:04:54.860', NULL, 'NM_DML_WHERE_INDEX_COLUMN_FUNCTION_RISK', '索引字段函数包裹风险', 'WHERE条件中索引字段被函数包裹，可能导致索引失效', 'warning', 'DML', 1, 'WHERE 条件中对索引字段使用函数或表达式包装，可能导致 MySQL 无法有效使用普通 BTree 索引。默认提示警告；如需严格管控，可在审核规则管理页面将严重级别调整为 error。', 'UPDATE users SET status = 1 WHERE ABS(age) = 18', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (82, '2026-07-22 15:48:50.000', '2026-07-22 15:48:50.000', NULL, 'NM_DML_ON_DUPLICATE_FORBID_NON_IDEMPOTENT', '禁止ON DUPLICATE非幂等更新', 'ON DUPLICATE KEY UPDATE不允许基于字段当前值进行累加或计算', 'error', 'DML', 1, '字段自增、递减或基于当前值计算的表达式在重复执行时会继续变化，无法保证幂等性。', 'INSERT INTO users(id, retry_count) VALUES (1, 1) ON DUPLICATE KEY UPDATE retry_count = retry_count + 1;', NULL);
+INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (83, '2026-07-23 00:00:00.000', '2026-07-23 00:00:00.000', NULL, 'NM_SQL_CROSS_DATABASE_FORBIDDEN', '禁止跨数据库执行', 'SQL只能访问工单选择的目标数据库', 'warning', 'common', 1, '当工单选择数据库 db_a 时，SQL 中显式操作 db_b.table_name 这类其他库对象会触发提示。当前默认只警告不阻断；如需严格限制，可在审核规则管理页面将严重级别调整为 error。开启跨库后，部分动态元数据审核仍以工单选择库为主。', '工单选择 db_a，但提交 SQL：UPDATE db_b.users SET status = 0 WHERE id = 1;', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (84, '2026-05-13 00:00:00.000', '2026-05-13 00:00:00.000', NULL, 'NM_DDL_DROP_TABLE_RISK', 'DROP TABLE风险提醒', 'DROP TABLE可能造成数据永久丢失，默认仅提醒风险、不阻断执行', 'warning', 'DDL', 1, '检测到DROP TABLE时提示确认目标表、备份和恢复方案。该规则默认仅作风险提醒，不阻断工单。', 'DROP TABLE audit_logs;', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (85, '2026-05-13 00:00:00.000', '2026-05-13 00:00:00.000', NULL, 'NM_DDL_DROP_COLUMN_RISK', 'DROP COLUMN风险提醒', '删除字段可能造成数据永久丢失，默认仅提醒风险、不阻断执行', 'warning', 'DDL', 1, '检测到ALTER TABLE DROP COLUMN时提示确认字段数据、依赖关系和恢复方案。该规则默认仅作风险提醒，不阻断工单。', 'ALTER TABLE users DROP COLUMN legacy_code;', NULL);
 INSERT INTO `audit_rules` (`id`, `created_at`, `updated_at`, `deleted_at`, `code`, `name`, `description`, `severity`, `type`, `enabled`, `explanation`, `example`, `config`) VALUES (86, '2026-05-13 00:00:00.000', '2026-05-13 00:00:00.000', NULL, 'NM_DDL_RENAME_TABLE_RISK', 'RENAME TABLE风险提醒', '重命名表可能影响现有业务访问，默认仅提醒风险、不阻断执行', 'warning', 'DDL', 1, '检测到RENAME TABLE时提示确认应用引用、权限和上下游依赖是否已同步调整。该规则默认仅作风险提醒，不阻断工单。', 'RENAME TABLE users TO app_users;', NULL);
@@ -191,7 +191,7 @@ CREATE TABLE `data_sources` (
   `database` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '数据库名',
   `username` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '用户名',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '密码(加密)',
-  `environment` varchar(20) COLLATE utf8mb4_general_ci DEFAULT '生产' COMMENT '环境',
+  `environment` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '生产' COMMENT '环境',
   `execution_timeout_seconds` int DEFAULT '30' COMMENT '执行超时时间(秒)',
   `query_timeout_seconds` int DEFAULT '30' COMMENT '查询超时时间(秒)',
   `connect_timeout` bigint DEFAULT '10' COMMENT '连接超时时间(秒)',
@@ -205,6 +205,29 @@ CREATE TABLE `data_sources` (
 -- Records of data_sources
 -- ----------------------------
 BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for feishu_config
+-- ----------------------------
+DROP TABLE IF EXISTS `feishu_config`;
+CREATE TABLE `feishu_config` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `app_id` varchar(100) NOT NULL DEFAULT '',
+  `app_secret` varchar(255) NOT NULL DEFAULT '',
+  `redirect_uri` varchar(500) NOT NULL DEFAULT '',
+  `default_role` varchar(20) NOT NULL DEFAULT 'developer',
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Records of feishu_config
+-- ----------------------------
+BEGIN;
+INSERT INTO `feishu_config` (`id`, `enabled`, `app_id`, `app_secret`, `redirect_uri`, `default_role`, `created_at`, `updated_at`) VALUES (1, 0, 'cli_xxxxxxxxxxxxxxxx', 'your-app-secret', 'https://nextmeta.example.com/api/v1/auth/feishu/callback', 'readonly', '2026-08-07 14:19:45.798', '2026-08-08 22:04:12.729');
 COMMIT;
 
 -- ----------------------------
@@ -226,7 +249,7 @@ CREATE TABLE `group_approvers` (
 -- Records of group_approvers
 -- ----------------------------
 BEGIN;
-INSERT INTO `group_approvers` (`id`, `created_at`, `updated_at`, `deleted_at`, `group_id`, `user_id`) VALUES (1, '2026-07-22 19:06:17.037', '2026-07-22 19:06:17.037', NULL, 1, 1);
+INSERT INTO `group_approvers` (`id`, `created_at`, `updated_at`, `deleted_at`, `group_id`, `user_id`) VALUES (6, '2026-08-08 21:31:03.073', '2026-08-08 21:31:03.073', NULL, 1, 1);
 COMMIT;
 
 -- ----------------------------
@@ -260,21 +283,127 @@ CREATE TABLE `groups` (
   `updated_at` datetime(3) DEFAULT NULL,
   `deleted_at` datetime(3) DEFAULT NULL,
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '组名',
-  `code` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '组编码',
-  `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'enabled' COMMENT '状态(enabled/disabled)',
+  `code` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '组编码',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'enabled' COMMENT '状态(enabled/disabled)',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
   `source` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'local' COMMENT '来源(local/ldap)',
   `dn` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'LDAP DN',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_groups_name` (`name`),
   KEY `idx_groups_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of groups
 -- ----------------------------
 BEGIN;
-INSERT INTO `groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `name`, `code`, `status`, `description`, `source`, `dn`) VALUES (1, '2025-12-03 17:52:57.616', '2026-07-22 13:05:06.861', NULL, 'NextMeta_Groups', 'NextMeta_Groups', 'enabled', '-', 'local', '');
+INSERT INTO `groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `name`, `code`, `status`, `description`, `source`, `dn`) VALUES (1, '2025-12-03 17:52:57.616', '2026-08-07 20:28:51.955', NULL, 'NextMeta_Groups', 'NextMeta_Groups', 'enabled', '-', 'local', '');
+COMMIT;
+
+-- ----------------------------
+-- Table structure for ldap_config
+-- ----------------------------
+DROP TABLE IF EXISTS `ldap_config`;
+CREATE TABLE `ldap_config` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `url` varchar(255) NOT NULL DEFAULT '',
+  `base_dn` varchar(255) NOT NULL DEFAULT '',
+  `group_base_dn` varchar(255) NOT NULL DEFAULT '',
+  `bind_dn` varchar(255) NOT NULL DEFAULT '',
+  `bind_pass` varchar(255) NOT NULL DEFAULT '',
+  `user_filter` varchar(500) NOT NULL DEFAULT '(objectClass=person)',
+  `group_filter` varchar(500) NOT NULL DEFAULT '(objectClass=*)',
+  `mapping_username` varchar(100) NOT NULL DEFAULT 'uid',
+  `mapping_real_name` varchar(100) NOT NULL DEFAULT 'cn',
+  `mapping_email` varchar(100) NOT NULL DEFAULT 'mail',
+  `sync_interval` int NOT NULL DEFAULT '30',
+  `exclude_keywords` varchar(255) NOT NULL DEFAULT 'admin',
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Records of ldap_config
+-- ----------------------------
+BEGIN;
+INSERT INTO `ldap_config` (`id`, `enabled`, `url`, `base_dn`, `group_base_dn`, `bind_dn`, `bind_pass`, `user_filter`, `group_filter`, `mapping_username`, `mapping_real_name`, `mapping_email`, `sync_interval`, `exclude_keywords`, `created_at`, `updated_at`) VALUES (1, 0, 'ldap://127.0.0.1:3890', 'dc=example,dc=com', 'ou=groups,dc=example,dc=com', 'uid=admin,ou=people,dc=example,dc=com', 'your-password', '(objectClass=person)', '(objectClass=*)', 'uid', 'cn', 'mail', 30, 'admin,lldap', '2026-08-07 15:35:09.343', '2026-08-08 22:03:50.449');
+COMMIT;
+
+-- ----------------------------
+-- Table structure for login_audits
+-- ----------------------------
+DROP TABLE IF EXISTS `login_audits`;
+CREATE TABLE `login_audits` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL DEFAULT '0',
+  `username` varchar(50) NOT NULL DEFAULT '' COMMENT '登录用户名',
+  `login_method` varchar(20) NOT NULL DEFAULT '' COMMENT '登录方式(local/ldap/feishu)',
+  `client_ip` varchar(45) NOT NULL DEFAULT '' COMMENT '客户端 IP',
+  `user_agent` varchar(500) NOT NULL DEFAULT '' COMMENT '浏览器 User-Agent',
+  `success` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否登录成功',
+  `error_message` varchar(255) NOT NULL DEFAULT '' COMMENT '失败原因',
+  `created_at` datetime(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  KEY `idx_created_at` (`created_at`),
+  KEY `idx_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Records of login_audits
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for oauth_login_tickets
+-- ----------------------------
+DROP TABLE IF EXISTS `oauth_login_tickets`;
+CREATE TABLE `oauth_login_tickets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `ticket_hash` varchar(64) NOT NULL,
+  `user_id` bigint unsigned NOT NULL,
+  `provider` varchar(20) NOT NULL,
+  `expires_at` datetime(3) NOT NULL,
+  `consumed_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_ticket_hash` (`ticket_hash`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_expires_at` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Records of oauth_login_tickets
+-- ----------------------------
+BEGIN;
+COMMIT;
+
+-- ----------------------------
+-- Table structure for oauth_states
+-- ----------------------------
+DROP TABLE IF EXISTS `oauth_states`;
+CREATE TABLE `oauth_states` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `state_hash` varchar(64) NOT NULL,
+  `provider` varchar(20) NOT NULL,
+  `purpose` varchar(20) NOT NULL,
+  `redirect_uri` varchar(500) NOT NULL DEFAULT '',
+  `client_ip` varchar(45) NOT NULL DEFAULT '',
+  `expires_at` datetime(3) NOT NULL,
+  `consumed_at` datetime(3) DEFAULT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_state_hash` (`state_hash`),
+  KEY `idx_provider_purpose` (`provider`,`purpose`),
+  KEY `idx_expires_at` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Records of oauth_states
+-- ----------------------------
+BEGIN;
 COMMIT;
 
 -- ----------------------------
@@ -325,7 +454,7 @@ CREATE TABLE `sql_tickets` (
   `is_force` tinyint(1) DEFAULT '0' COMMENT '是否强制提交',
   `database` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '目标数据库名',
   `approver_id` bigint unsigned NOT NULL DEFAULT '0' COMMENT '指定审核人ID',
-  `statement_results` longtext COLLATE utf8mb4_general_ci COMMENT '逐语句执行结果JSON',
+  `statement_results` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '逐语句执行结果JSON',
   PRIMARY KEY (`id`),
   KEY `idx_sql_tickets_deleted_at` (`deleted_at`),
   KEY `fk_sql_tickets_creator` (`creator_id`),
@@ -356,21 +485,14 @@ CREATE TABLE `system_settings` (
 -- ----------------------------
 BEGIN;
 INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('global_sql_limit', '1000', '全局 SQL 查询行数限制 (Global SQL Query Limit)', '2025-12-05 15:39:59.497', '2026-06-24 17:34:08.665');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_enabled', 'false', '', '2026-06-24 16:03:11.323', '2026-07-22 10:21:17.652');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_exclude_keywords', 'admin,lldap', '', '2026-06-24 17:25:30.463', '2026-07-22 10:21:17.739');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_group_filter', '(objectClass=*)', '', '2026-06-24 16:03:11.334', '2026-07-22 10:21:17.691');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_mapping_email', 'mail', '', '2026-06-24 16:03:11.309', '2026-07-22 10:21:17.724');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_mapping_real_name', 'cn', '', '2026-06-24 16:03:11.303', '2026-07-22 10:21:17.716');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_mapping_username', 'uid', '', '2026-06-24 16:03:11.267', '2026-07-22 10:21:17.702');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_sync_interval_minutes', '30', '', '2026-06-24 17:06:37.423', '2026-07-22 10:21:17.733');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('ldap_user_filter', '(objectClass=person)', '', '2026-06-24 16:03:11.328', '2026-07-22 10:21:17.679');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_enabled', 'false', '是否启用系统通知 (Enable System Notification)', '2026-07-23 12:53:34.633', '2026-07-23 14:38:05.742');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_created', 'true', '工单创建通知开关 (Ticket Created Notification Switch)', '2026-07-23 12:53:34.555', '2026-07-23 14:38:05.787');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_executed', 'true', '工单执行成功通知开关 (Ticket Executed Notification Switch)', '2026-07-23 12:53:34.604', '2026-07-23 14:38:05.802');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_failed', 'true', '工单执行失败通知开关 (Ticket Failed Notification Switch)', '2026-07-23 12:53:34.617', '2026-07-23 14:38:05.807');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_rejected', 'true', '工单驳回通知开关 (Ticket Rejected Notification Switch)', '2026-07-23 12:53:34.595', '2026-07-23 14:38:05.795');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_template_ticket', '{STATUS}｜{TYPE}｜{DATABASE}\n\n工单：{TICKET_NO} - {TITLE}\n数据源：{DATASOURCE}\n操作人：{OPERATOR}\n时间：{OPERATION_TIME}\n\n处理说明：\n{REMARK}\n\n执行结果：\n{EXECUTE_RESULT}', '工单通用通知模板 (Ticket Notification Template)', '2026-07-23 12:53:34.627', '2026-07-23 14:38:05.813');
-INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_webhook_url', '', '系统通知 Webhook 地址 (System Notification Webhook URL)', '2026-07-23 12:53:34.638', '2026-07-23 14:38:05.779');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('local_enabled', 'true', '', '2026-08-07 18:39:45.597', '2026-08-07 18:56:25.466');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_enabled', 'false', '是否启用系统通知 (Enable System Notification)', '2026-07-23 12:53:34.633', '2026-08-08 22:06:39.469');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_created', 'false', '工单创建通知开关 (Ticket Created Notification Switch)', '2026-07-23 12:53:34.555', '2026-08-08 22:06:39.436');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_executed', 'false', '工单执行成功通知开关 (Ticket Executed Notification Switch)', '2026-07-23 12:53:34.604', '2026-08-08 22:06:39.454');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_failed', 'false', '工单执行失败通知开关 (Ticket Failed Notification Switch)', '2026-07-23 12:53:34.617', '2026-08-08 22:06:39.459');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_event_ticket_rejected', 'false', '工单驳回通知开关 (Ticket Rejected Notification Switch)', '2026-07-23 12:53:34.595', '2026-08-08 22:06:39.448');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_template_ticket', '{STATUS}｜{TYPE}｜{DATABASE}\n\n工单：{TICKET_NO} - {TITLE}\n数据源：{DATASOURCE}\n操作人：{OPERATOR}\n时间：{OPERATION_TIME}\n\n处理说明：\n{REMARK}\n\n执行结果：\n{EXECUTE_RESULT}', '工单通用通知模板 (Ticket Notification Template)', '2026-07-23 12:53:34.627', '2026-08-08 22:06:39.464');
+INSERT INTO `system_settings` (`key`, `value`, `description`, `created_at`, `updated_at`) VALUES ('notification_webhook_url', 'https://open.feishu.cn/open-apis/bot/v2/hook/*********************', '系统通知 Webhook 地址 (System Notification Webhook URL)', '2026-07-23 12:53:34.638', '2026-08-08 22:06:39.473');
 COMMIT;
 
 -- ----------------------------
@@ -420,7 +542,37 @@ CREATE TABLE `user_groups` (
 -- Records of user_groups
 -- ----------------------------
 BEGIN;
-INSERT INTO `user_groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `group_id`) VALUES (1, '2026-07-22 19:06:17.007', '2026-07-22 19:06:17.007', NULL, 1, 1);
+INSERT INTO `user_groups` (`id`, `created_at`, `updated_at`, `deleted_at`, `user_id`, `group_id`) VALUES (11, '2026-08-08 21:31:03.072', '2026-08-08 21:31:03.072', NULL, 1, 1);
+COMMIT;
+
+-- ----------------------------
+-- Table structure for user_oauth_bindings
+-- ----------------------------
+DROP TABLE IF EXISTS `user_oauth_bindings`;
+CREATE TABLE `user_oauth_bindings` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint unsigned NOT NULL,
+  `provider` varchar(20) NOT NULL,
+  `provider_user_id` varchar(100) NOT NULL,
+  `union_id` varchar(100) NOT NULL DEFAULT '',
+  `open_id` varchar(100) NOT NULL DEFAULT '',
+  `nickname` varchar(100) NOT NULL DEFAULT '',
+  `avatar_url` varchar(500) NOT NULL DEFAULT '',
+  `email` varchar(100) NOT NULL DEFAULT '',
+  `raw_profile` text,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_provider_user` (`user_id`,`provider`),
+  UNIQUE KEY `idx_provider_provider_user` (`provider`,`provider_user_id`),
+  KEY `idx_union_id` (`union_id`),
+  KEY `idx_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------
+-- Records of user_oauth_bindings
+-- ----------------------------
+BEGIN;
 COMMIT;
 
 -- ----------------------------
@@ -436,21 +588,22 @@ CREATE TABLE `users` (
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '加密密码',
   `real_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '真实姓名',
   `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
+  `avatar_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '头像地址',
   `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'user' COMMENT '角色(admin/user)',
-  `status` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'enabled' COMMENT '状态(enabled/disabled)',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'enabled' COMMENT '状态(enabled/disabled)',
   `source` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'local' COMMENT '来源(local/ldap)',
   `dn` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'LDAP DN',
   `last_login_at` datetime(3) DEFAULT NULL COMMENT '最后登录时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_users_username` (`username`),
   KEY `idx_users_deleted_at` (`deleted_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=43 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ----------------------------
 -- Records of users
 -- ----------------------------
 BEGIN;
-INSERT INTO `users` (`id`, `created_at`, `updated_at`, `deleted_at`, `username`, `password`, `real_name`, `email`, `role`, `status`, `source`, `dn`, `last_login_at`) VALUES (1, '2025-12-03 14:38:26.235', '2026-07-23 14:27:21.412', NULL, 'NextMeta', '$2b$12$TXGL8rxggLW6y2uDk8xGCenIfpwEM28b9/md/8gpBPHiNzKQKL.ri', '超级管理员', 'admin@nextmeta.local', 'super_admin', 'enabled', 'local', '', '2026-07-23 14:27:21.401');
+INSERT INTO `users` (`id`, `created_at`, `updated_at`, `deleted_at`, `username`, `password`, `real_name`, `email`, `avatar_url`, `role`, `status`, `source`, `dn`, `last_login_at`) VALUES (1, '2025-12-03 14:38:26.235', '2026-08-07 21:25:06.877', NULL, 'NextMeta', '$2b$12$TXGL8rxggLW6y2uDk8xGCenIfpwEM28b9/md/8gpBPHiNzKQKL.ri', '超级管理员', 'admin@nextmeta.local', '', 'super_admin', 'enabled', 'local', '', NULL);
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
