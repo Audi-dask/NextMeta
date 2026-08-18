@@ -12,7 +12,7 @@ database:
 
 # 只要每 7 天内有活动，就不需要重新登录。如果闲置超过 7 天，需要重新登录。
 jwt:
-  secret_key: "o7nhR3guXCDz86QN"
+  secret_key: "o7nhR3guXCDz23QN"
   expires: 1h
   refresh_expires: 7d
 
