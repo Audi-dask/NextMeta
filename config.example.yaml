@@ -7,7 +7,7 @@ database:
   host: "mysql"                  # Docker Compose 内通过服务名访问 MySQL
   port: "3306"                   # 数据库端口
   user: "root"                   # 数据库用户名
-  password: "4oOQq1ul0GNCpHn9"   # 数据库密码（请修改为强密码）
+  password: "oepuE0KOm4TW8V6j"   # 数据库密码（请修改为强密码）
   dbname: "nextmeta"             # 数据库名称
 
 # 只要每 7 天内有活动，就不需要重新登录。如果闲置超过 7 天，需要重新登录。
