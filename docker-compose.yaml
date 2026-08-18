@@ -8,6 +8,7 @@ services:
     volumes:
       - ./config.yaml:/app/config.yaml:ro
       - nextmeta-data:/data
+      - nextmeta-license:/app/license.lic
     environment:
       TZ: Asia/Shanghai
     depends_on:
