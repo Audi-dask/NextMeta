@@ -1,6 +1,6 @@
 services:
   nextmeta:
-    image: ccr.ccs.tencentyun.com/dbak/nextmeta:latest # 最新版本20260808-222938
+    image: ccr.ccs.tencentyun.com/dbak/nextmeta:v2.0.3
     container_name: nextmeta
     restart: unless-stopped
     ports:
@@ -34,6 +34,8 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "0.0.0.0:3306:3306"
     networks:
       - nextmeta-net
     healthcheck:

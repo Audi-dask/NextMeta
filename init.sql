@@ -197,6 +197,7 @@ CREATE TABLE `data_sources` (
   `connect_timeout` bigint DEFAULT '10' COMMENT '连接超时时间(秒)',
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '描述',
   `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'active' COMMENT '状态(active/inactive)',
+  `access_mode` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'read_write' COMMENT '访问模式(read_only/read_write)',
   PRIMARY KEY (`id`),
   KEY `idx_data_sources_deleted_at` (`deleted_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -24,3 +24,18 @@ dist-ssr
 *.sw?
 *.un
 
+# Closed-source parts: SQL audit rule engine and license (never commit even if copied by mistake)
+backend/internal/audit/
+backend/internal/license/
+
+# Related files of the closed-source parts
+backend/internal/service/audit_service.go
+backend/internal/service/audit_service_test.go
+backend/internal/service/license_service.go
+backend/internal/router/license_guard.go
+backend/internal/api/v1/audit_rule_handler.go
+backend/internal/model/audit_rule.go
+
+# Closed-source license asset
+license.lic
+
