@@ -14,6 +14,8 @@
 
 </div>
 
+![Dashboard 总览](./img/poster.png)
+
 ## 一键安装
 
 ```bash
