@@ -8,6 +8,14 @@ export default defineConfig({
   lang: 'zh-CN',
   base: '/NextMeta/',
   lastUpdated: true,
+  // 首页使用 Spline 官方 viewer 的 Web Component，告知 Vue 编译器按自定义元素处理。
+  vue: {
+    template: {
+      compilerOptions: {
+        isCustomElement: (tag) => tag === 'spline-viewer'
+      }
+    }
+  },
   // 存量文档中存在指向仓库 img/ 目录的相对图片链接，暂时跳过死链检查，后续迁移图片后再移除。
   ignoreDeadLinks: true,
 

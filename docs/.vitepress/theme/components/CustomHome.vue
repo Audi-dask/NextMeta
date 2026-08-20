@@ -5,26 +5,12 @@
     @mouseleave="handleMouseLeave"
     ref="containerRef"
   >
-    <!-- Layer 1: Dynamic 3D WebGL / Fluid Mesh Gradient Canvas -->
-    <div class="canvas-background-layer">
-      <canvas ref="canvasRef" class="webgl-canvas"></canvas>
-      
-      <!-- Ambient Fluid Light Blobs for Depth -->
-      <div class="ambient-blob blob-1"></div>
-      <div class="ambient-blob blob-2"></div>
-      <div class="ambient-blob blob-3"></div>
-      <div class="grid-overlay"></div>
+    <!-- Layer 1: Spline 官方 viewer 渲染的 3D 场景（与 spline.design 首页同款） -->
+    <div class="spline-background-layer">
+      <spline-viewer url="/NextMeta/scene.splinecode" loading-anim-type="spinner-small-dark"></spline-viewer>
     </div>
 
-    <!-- Layer 2: Spline 3D Scene Container (Optional / Ready for Spline Export) -->
-    <!-- 提示：如果您在 Spline 导出了模型链接，只需取消注释下方并填入 url 即可 -->
-    <!-- 
-    <div v-if="splineUrl" class="spline-scene-wrapper">
-      <spline-viewer :url="splineUrl" loading-anim-type="spinner-small-dark"></spline-viewer>
-    </div> 
-    -->
-
-    <!-- Layer 3: Foreground Glassmorphism UI (Navbar and UI remain steady; 3D background reacts to interaction) -->
+    <!-- Layer 2: Foreground Glassmorphism UI (Navbar and UI remain steady; 3D background reacts to interaction) -->
     <div class="parallax-viewport">
       <!-- Top Floating Glass Navigation Header - Fixed & Solid -->
       <header class="glass-navbar">
@@ -46,11 +32,11 @@
           <a 
             href="https://github.com/Audi-dask/NextMeta" 
             target="_blank" 
-            rel="noopener noreferrer" 
+            rel="noopener noreferrer"
             class="github-button glass-pill"
           >
             <svg class="icon-gh" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-0.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77A5.07 5.07 0 0 0 19.91 1S18.73 0.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27 0.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
             </svg>
             <span>Audi-dask/NextMeta</span>
             <span class="star-count">★ Star</span>
@@ -179,25 +165,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue';
-import * as THREE from 'three';
 
 // ----------------------------------------------------
-// 1. Spline 集成预留接口
-// 若未来需要引入 Spline 导出的模型，只需将 splineUrl 赋值为您的 CDN 地址即可：
-// 例如: "https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
-// ----------------------------------------------------
-const splineUrl = ref<string>('');
-
-// ----------------------------------------------------
-// 2. 状态与响应式变量
+// 1. 状态与响应式变量
 // ----------------------------------------------------
 const containerRef = ref<HTMLElement | null>(null);
-const canvasRef = ref<HTMLCanvasElement | null>(null);
 const currentYear = new Date().getFullYear();
 const copied = ref(false);
 const activeFeature = ref(0);
 
-// 鼠标位置与平滑插值 (3D Parallax)
+// 鼠标位置与平滑插值 (卡片视差)
 const mouse = reactive({
   targetX: 0,
   targetY: 0,
@@ -230,17 +207,8 @@ const features = [
 ];
 
 // ----------------------------------------------------
-// 3. 视差动画样式计算 (Parallax Tilt)
+// 2. 视差动画样式计算 (Parallax Tilt)
 // ----------------------------------------------------
-const parallaxTransformStyle = computed(() => {
-  const rotateX = -mouse.currentY * 6; // 上下倾斜角度
-  const rotateY = mouse.currentX * 8;  // 左右倾斜角度
-  return {
-    transform: `perspective(1200px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg)`,
-    transition: 'transform 0.08s ease-out'
-  };
-});
-
 const cardParallaxStyle = computed(() => {
   const moveX = mouse.currentX * 16;
   const moveY = mouse.currentY * 16;
@@ -273,269 +241,32 @@ function copyQuickInstall() {
 }
 
 // ----------------------------------------------------
-// 4. Three.js 3D WebGL 空间与 1:1 Spline 几何体悬浮渲染
+// 3. Spline 官方 viewer 加载（脚本与场景均自托管于 docs/public/spline）
 // ----------------------------------------------------
-let animationFrameId: number;
-let scene: THREE.Scene;
-let camera: THREE.PerspectiveCamera;
-let renderer: THREE.WebGLRenderer;
-let worldGroup: THREE.Group;
-let bunnyGroup: THREE.Group;
-let cursorLight: THREE.PointLight;
-const floatingObjects: {
-  mesh: THREE.Object3D;
-  basePos: THREE.Vector3;
-  baseRot: THREE.Euler;
-  floatSpeed: number;
-  floatAmplitude: number;
-  phase: number;
-}[] = [];
-
-const orbitRotation = { x: 0, y: 0, targetX: 0, targetY: 0 };
-let isDragging = false;
-let dragStart = { x: 0, y: 0 };
-
-function initThreeScene() {
-  if (!canvasRef.value) return;
-
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x020205);
-  scene.fog = new THREE.FogExp2(0x020205, 0.022);
-
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
-  camera.position.set(0, 0, 26);
-
-  renderer = new THREE.WebGLRenderer({
-    canvas: canvasRef.value,
-    antialias: true,
-    powerPreference: 'high-performance'
-  });
-  renderer.setSize(width, height);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.35;
-
-  // 1. Studio Lighting Rig
-  const ambient = new THREE.AmbientLight(0xffffff, 1.4);
-  scene.add(ambient);
-
-  const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
-  keyLight.position.set(12, 18, 16);
-  scene.add(keyLight);
-
-  const fillLight = new THREE.DirectionalLight(0x93c5fd, 1.6);
-  fillLight.position.set(-15, -10, -10);
-  scene.add(fillLight);
-
-  cursorLight = new THREE.PointLight(0xffffff, 3.5, 45);
-  cursorLight.position.set(0, 0, 10);
-  scene.add(cursorLight);
-
-  worldGroup = new THREE.Group();
-  scene.add(worldGroup);
-
-  // 2. 3D Perspective Floor Grid
-  const gridHelper = new THREE.GridHelper(90, 45, 0x3b82f6, 0x1e293b);
-  gridHelper.position.set(0, -8.5, 0);
-  (gridHelper.material as THREE.Material).transparent = true;
-  (gridHelper.material as THREE.Material).opacity = 0.22;
-  worldGroup.add(gridHelper);
-
-  // 3. Helper for Pillow Monitor Screens
-  const createPillowMonitor = (w: number, h: number, d: number, sc: number, ec: number, int: number = 0.9) => {
-    const grp = new THREE.Group();
-    const bGeo = new THREE.BoxGeometry(w + 0.5, h + 0.5, d, 16, 16, 16);
-    const bMat = new THREE.MeshStandardMaterial({ color: 0x111115, roughness: 0.45, metalness: 0.6 });
-    grp.add(new THREE.Mesh(bGeo, bMat));
-
-    const sGeo = new THREE.BoxGeometry(w, h, d + 0.15, 20, 20, 20);
-    const sMat = new THREE.MeshPhysicalMaterial({
-      color: sc,
-      emissive: ec,
-      emissiveIntensity: int,
-      roughness: 0.1,
-      metalness: 0.25,
-      clearcoat: 1.0,
-      transmission: 0.35,
-      opacity: 0.96,
-      transparent: true
-    });
-    grp.add(new THREE.Mesh(sGeo, sMat));
-    return grp;
-  };
-
-  // 4. Exact Objects from Spline.design Hero Image
-  // A. Bottom-Left Blue Monitor
-  const botLeft = createPillowMonitor(4.4, 3.2, 1.4, 0x3b82f6, 0x1d4ed8, 1.1);
-  botLeft.position.set(-8.8, -3.8, 2.0);
-  botLeft.rotation.set(-0.15, 0.35, 0.08);
-  worldGroup.add(botLeft);
-  floatingObjects.push({ mesh: botLeft, basePos: botLeft.position.clone(), baseRot: botLeft.rotation.clone(), floatSpeed: 0.9, floatAmplitude: 0.25, phase: 0 });
-
-  // B. Top-Left Magenta Monitor
-  const topLeft = createPillowMonitor(3.6, 2.6, 1.2, 0xec4899, 0xbe185d, 1.2);
-  topLeft.position.set(-7.5, 6.6, 0.5);
-  topLeft.rotation.set(0.2, 0.3, -0.15);
-  worldGroup.add(topLeft);
-  floatingObjects.push({ mesh: topLeft, basePos: topLeft.position.clone(), baseRot: topLeft.rotation.clone(), floatSpeed: 1.1, floatAmplitude: 0.3, phase: 1.2 });
-
-  // C. Right-Center Emerald Green Monitor
-  const rightGreen = createPillowMonitor(4.2, 3.4, 1.4, 0x10b981, 0x059669, 1.3);
-  rightGreen.position.set(7.6, -1.4, 1.8);
-  rightGreen.rotation.set(0.1, -0.38, -0.12);
-  worldGroup.add(rightGreen);
-  floatingObjects.push({ mesh: rightGreen, basePos: rightGreen.position.clone(), baseRot: rightGreen.rotation.clone(), floatSpeed: 1.0, floatAmplitude: 0.26, phase: 0.8 });
-
-  // D. Top-Right Golden Cube
-  const yCubeGeo = new THREE.BoxGeometry(2.5, 2.5, 1.6, 12, 12, 12);
-  const yCubeMat = new THREE.MeshPhysicalMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.65, roughness: 0.1, metalness: 0.35, clearcoat: 1.0 });
-  const yCube = new THREE.Mesh(yCubeGeo, yCubeMat);
-  yCube.position.set(8.5, 6.8, 1.2);
-  yCube.rotation.set(0.4, -0.45, 0.3);
-  worldGroup.add(yCube);
-  floatingObjects.push({ mesh: yCube, basePos: yCube.position.clone(), baseRot: yCube.rotation.clone(), floatSpeed: 1.05, floatAmplitude: 0.28, phase: 3.4 });
-
-  // E. Cute Origami Robot Bunny
-  bunnyGroup = new THREE.Group();
-  bunnyGroup.position.set(2.4, -4.8, 3.2);
-  const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.1 });
-  const pinkMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, emissive: 0xe11d48, emissiveIntensity: 0.4, roughness: 0.3 });
-  const eyeMat = new THREE.MeshStandardMaterial({ color: 0x09090b, roughness: 0.05, metalness: 0.9 });
-
-  const bunnyHead = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.4, 1.4, 8, 8, 8), whiteMat);
-  bunnyGroup.add(bunnyHead);
-
-  const leftEar = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.2, 0.28), whiteMat);
-  leftEar.position.set(-0.45, 1.15, 0.05);
-  leftEar.rotation.z = 0.1;
-  const leftInner = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.9, 0.1), pinkMat);
-  leftInner.position.set(0, 0, 0.1);
-  leftEar.add(leftInner);
-  bunnyGroup.add(leftEar);
-
-  const rightEar = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1.2, 0.28), whiteMat);
-  rightEar.position.set(0.45, 1.15, 0.05);
-  rightEar.rotation.z = -0.1;
-  const rightInner = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.9, 0.1), pinkMat);
-  rightInner.position.set(0, 0, 0.1);
-  rightEar.add(rightInner);
-  bunnyGroup.add(rightEar);
-
-  const leftEye = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.24, 0.15), eyeMat);
-  leftEye.position.set(-0.42, 0.05, 0.72);
-  bunnyGroup.add(leftEye);
-
-  const rightEye = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.24, 0.15), eyeMat);
-  rightEye.position.set(0.42, 0.05, 0.72);
-  bunnyGroup.add(rightEye);
-
-  const nose = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.14, 0.12), pinkMat);
-  nose.position.set(0, -0.12, 0.72);
-  bunnyGroup.add(nose);
-
-  const bunnyBody = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.9, 1.2), whiteMat);
-  bunnyBody.position.set(0, -0.9, -0.1);
-  bunnyGroup.add(bunnyBody);
-
-  const pawL = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.35, 0.6), whiteMat);
-  pawL.position.set(-0.45, -1.25, 0.35);
-  bunnyGroup.add(pawL);
-
-  const pawR = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.35, 0.6), whiteMat);
-  pawR.position.set(0.45, -1.25, 0.35);
-  bunnyGroup.add(pawR);
-
-  worldGroup.add(bunnyGroup);
-  floatingObjects.push({ mesh: bunnyGroup, basePos: bunnyGroup.position.clone(), baseRot: bunnyGroup.rotation.clone(), floatSpeed: 1.4, floatAmplitude: 0.18, phase: 0.5 });
-
-  // 5. Drag to orbit listeners
-  window.addEventListener('mousedown', (e) => {
-    isDragging = true;
-    dragStart = { x: e.clientX, y: e.clientY };
-  });
-  window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    orbitRotation.targetY += dx * 0.0055;
-    orbitRotation.targetX += dy * 0.0045;
-    dragStart = { x: e.clientX, y: e.clientY };
-  });
-  window.addEventListener('mouseup', () => { isDragging = false; });
-
-  window.addEventListener('resize', onWindowResize);
+function loadSplineViewer() {
+  if (document.querySelector('#spline-viewer-script')) return;
+  const script = document.createElement('script');
+  script.id = 'spline-viewer-script';
+  script.type = 'module';
+  script.src = '/NextMeta/spline/spline-viewer.js';
+  document.head.appendChild(script);
 }
 
-function onWindowResize() {
-  if (!renderer || !camera) return;
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
+// 卡片视差插值循环
+let rafId = 0;
+function tick() {
+  rafId = requestAnimationFrame(tick);
+  mouse.currentX += (mouse.targetX - mouse.currentX) * 0.08;
+  mouse.currentY += (mouse.targetY - mouse.currentY) * 0.08;
 }
 
-// 动画主循环 (平滑跟随与自转)
-function animate(time: number) {
-  animationFrameId = requestAnimationFrame(animate);
-  const t = time * 0.001;
-
-  mouse.currentX += (mouse.targetX - mouse.currentX) * 0.055;
-  mouse.currentY += (mouse.targetY - mouse.currentY) * 0.055;
-
-  orbitRotation.x += (orbitRotation.targetX - orbitRotation.x) * 0.08;
-  orbitRotation.y += (orbitRotation.targetY - orbitRotation.y) * 0.08;
-
-  if (cursorLight) {
-    cursorLight.position.x = mouse.currentX * 16;
-    cursorLight.position.y = -mouse.currentY * 12;
-  }
-
-  if (worldGroup) {
-    worldGroup.rotation.y = orbitRotation.y + (mouse.currentX * 0.25);
-    worldGroup.rotation.x = orbitRotation.x + (mouse.currentY * 0.18);
-  }
-
-  floatingObjects.forEach((obj, i) => {
-    const floatOffset = Math.sin(t * obj.floatSpeed + obj.phase) * obj.floatAmplitude;
-    obj.mesh.position.y = obj.basePos.y + floatOffset;
-    obj.mesh.rotation.x = obj.baseRot.x + Math.sin(t * 0.5 + i) * 0.06;
-    obj.mesh.rotation.y = obj.baseRot.y + Math.cos(t * 0.6 + i) * 0.08;
-  });
-
-  if (bunnyGroup) {
-    bunnyGroup.rotation.y = -0.22 + (mouse.currentX * 0.35);
-    bunnyGroup.rotation.x = 0.12 - (mouse.currentY * 0.2);
-  }
-
-  renderer.render(scene, camera);
-}
-
-// ----------------------------------------------------
-// 5. 生命周期管理
-// ----------------------------------------------------
 onMounted(() => {
-  initThreeScene();
-  animate(0);
-
-  // 如果引入了 Spline，动态加载 Spline Web Component 脚本
-  if (splineUrl.value && !document.querySelector('#spline-viewer-script')) {
-    const script = document.createElement('script');
-    script.id = 'spline-viewer-script';
-    script.type = 'module';
-    script.src = 'https://unpkg.com/@splinetool/viewer@1.9.72/build/spline-viewer.js';
-    document.head.appendChild(script);
-  }
+  loadSplineViewer();
+  tick();
 });
 
 onUnmounted(() => {
-  cancelAnimationFrame(animationFrameId);
-  window.removeEventListener('resize', onWindowResize);
-  if (renderer) {
-    renderer.dispose();
-  }
+  cancelAnimationFrame(rafId);
 });
 </script>
 
@@ -555,76 +286,25 @@ onUnmounted(() => {
   user-select: none;
 }
 
-/* 1. 背景流体渐变层 (Fluid Mesh Gradient Background) */
-.canvas-background-layer {
+/* 1. Spline 3D 场景背景层 */
+.spline-background-layer {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  pointer-events: none;
   z-index: 1;
   overflow: hidden;
 }
 
-.webgl-canvas {
+.spline-background-layer spline-viewer {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
 }
 
-/* 动态流体渐变光斑 (Mesh Gradient Blobs) */
-.ambient-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.55;
-  animation: floatFluid 18s ease-in-out infinite alternate;
-}
-
-.blob-1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, rgba(139, 92, 246, 0.05) 70%);
-  top: -150px;
-  left: -100px;
-}
-
-.blob-2 {
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, rgba(56, 189, 248, 0.08) 70%);
-  bottom: -200px;
-  right: -150px;
-  animation-duration: 22s;
-}
-
-.blob-3 {
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.3) 0%, rgba(16, 185, 129, 0) 70%);
-  top: 40%;
-  left: 55%;
-  animation-duration: 15s;
-}
-
-.grid-overlay {
-  position: absolute;
-  inset: 0;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 80%);
-}
-
-@keyframes floatFluid {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(60px, 40px) scale(1.1); }
-  100% { transform: translate(-40px, 80px) scale(0.95); }
-}
-
-/* 2. 前景 3D 视差视口 (Foreground Parallax Viewport) */
+/* 2. 前景 3D 视差视口 (Foreground Parallax Viewport)
+   容器整体不拦截指针，空白区域可拖拽旋转 3D 场景；交互元素单独恢复指针事件 */
 .parallax-viewport {
   position: relative;
   z-index: 2;
@@ -633,6 +313,16 @@ onUnmounted(() => {
   flex-direction: column;
   transform-style: preserve-3d;
   will-change: transform;
+  pointer-events: none;
+}
+
+.glass-navbar,
+.cta-group a,
+.cta-group button,
+.hero-showcase-glass,
+.feature-card,
+.glass-footer {
+  pointer-events: auto;
 }
 
 /* 3. 顶部毛玻璃导航条 (Glass Navbar) */
