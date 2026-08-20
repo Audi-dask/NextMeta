@@ -95,9 +95,9 @@
             <span>GitHub 仓库</span>
           </a>
 
-          <button @click="copyQuickInstall" class="btn-terminal-glass" title="点击复制部署命令">
+          <button @click="copyQuickInstall" class="btn-terminal-glass" title="点击复制一键安装命令">
             <span class="term-prefix">$</span>
-            <code>docker compose up -d</code>
+            <code>curl -fsSL .../install.sh | bash</code>
             <span class="copy-status">{{ copied ? '已复制 ✓' : '复制' }}</span>
           </button>
         </div>
@@ -114,22 +114,20 @@
             </div>
             <div class="panel-title-tab">
               <span class="tab-icon">⚡</span>
-              <span>deploy/docker-compose.yaml</span>
+              <span>install.sh — one-click deploy</span>
             </div>
-            <span class="panel-tag">DOCKER COMPOSE</span>
+            <span class="panel-tag">ONE-CLICK</span>
           </div>
 
           <div class="panel-body">
             <div class="code-preview">
-              <span class="code-comment"># 1. 克隆仓库并进入部署目录</span><br/>
-              <span class="code-keyword">git</span> clone https://github.com/Audi-dask/NextMeta.git<br/>
-              <span class="code-keyword">cd</span> NextMeta/deploy<br/>
+              <span class="code-comment"># 1. 一键安装：自动拉取最新配置并启动服务</span><br/>
+              <span class="code-keyword">curl</span> -fsSL https://raw.githubusercontent.com/Audi-dask/NextMeta/main/install.sh | <span class="code-keyword">bash</span><br/>
               <br/>
-              <span class="code-comment"># 2. 一键拉起 MySQL 与 NextMeta 服务</span><br/>
-              <span class="code-keyword">docker</span> compose up -d<br/>
+              <span class="code-comment"># 2. 访问控制台</span><br/>
+              <span class="code-func">open</span> <span class="code-str">http://localhost:8080</span><br/>
               <br/>
-              <span class="code-comment"># 3. 访问控制台</span><br/>
-              <span class="code-func">open</span> <span class="code-str">http://localhost:8080</span>
+              <span class="code-comment"># 默认管理员 NextMeta / password123，登录后请立即修改</span>
             </div>
 
             <!-- Live Engine Stats Subcard -->
@@ -267,7 +265,7 @@ function handleMouseLeave() {
 }
 
 function copyQuickInstall() {
-  navigator.clipboard.writeText('docker compose up -d');
+  navigator.clipboard.writeText('curl -fsSL https://raw.githubusercontent.com/Audi-dask/NextMeta/main/install.sh | bash');
   copied.value = true;
   setTimeout(() => {
     copied.value = false;
