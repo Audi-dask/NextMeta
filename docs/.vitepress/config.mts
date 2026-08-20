@@ -38,7 +38,7 @@ export default defineConfig({
         items: [
           { text: '功能说明', link: '/功能说明' },
           { text: '安全防护', link: '/安全防护' },
-          { text: '数据脱敏机制', link: '/脱敏规则测试文档' }
+          { text: '数据脱敏测试覆盖案例', link: '/脱敏规则测试文档' }
         ]
       },
       {
