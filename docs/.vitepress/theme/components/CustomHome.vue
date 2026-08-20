@@ -89,6 +89,19 @@
           </button>
         </div>
 
+        <!-- Star 引导 -->
+        <a
+          href="https://github.com/Audi-dask/NextMeta"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="star-cta"
+        >
+          <svg class="star-cta-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M12 2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 7.7l5.4-.8L12 2z"></path>
+          </svg>
+          <span>觉得有用？Star 一下，让更多人发现它</span>
+        </a>
+
         <!-- Interactive 3D Holographic Schema Preview Card -->
         <div class="hero-showcase-glass glass-panel" :style="cardParallaxStyle">
           <div class="glass-reflection-line"></div>
@@ -320,6 +333,7 @@ onUnmounted(() => {
 .glass-navbar,
 .cta-group a,
 .cta-group button,
+.star-cta,
 .hero-showcase-glass,
 .feature-card,
 .glass-footer {
@@ -616,6 +630,38 @@ onUnmounted(() => {
   background: rgba(56, 189, 248, 0.15);
   padding: 2px 8px;
   border-radius: 12px;
+}
+
+/* Star 引导条 */
+.star-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 56px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  color: #fbbf24;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.star-cta:hover {
+  background: rgba(251, 191, 36, 0.15);
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+  transform: translateY(-1px);
+}
+
+.star-cta-icon {
+  transition: transform 0.25s ease;
+}
+
+.star-cta:hover .star-cta-icon {
+  transform: rotate(20deg) scale(1.2);
 }
 
 /* 6. 毛玻璃全息卡片展示 (Hero Showcase Panel) */
