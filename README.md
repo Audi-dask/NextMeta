@@ -14,7 +14,7 @@
 
 </div>
 
-![Dashboard 总览](./img/poster.png)
+![Dashboard 总览](./poster.png)
 
 ## 一键安装
 
