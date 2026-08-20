@@ -113,7 +113,6 @@
               <span class="dot green"></span>
             </div>
             <div class="panel-title-tab">
-              <span class="tab-icon">⚡</span>
               <span>install.sh — one-click deploy</span>
             </div>
             <span class="panel-tag">ONE-CLICK</span>
