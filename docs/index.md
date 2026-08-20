@@ -5,6 +5,9 @@ hero:
   name: NextMeta
   text: 数据库 SQL 审核平台
   tagline: 轻量级、简约风，统一查询入口、工单审批与审计追踪
+  image:
+    src: /poster.jpg
+    alt: NextMeta 控制台
   actions:
     - theme: brand
       text: 部署指南
