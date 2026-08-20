@@ -45,7 +45,7 @@ export default defineConfig({
         text: '关于 NextMeta',
         items: [
           { text: '为什么选择 NextMeta', link: '/为什么选择NextMeta' },
-          { text: '路线图', link: '/路线图' },
+          { text: '未来计划', link: '/未来计划' },
           { text: '项目与社区', link: '/项目与社区' }
         ]
       }
