@@ -26,6 +26,7 @@
           <a href="/NextMeta/guide/" class="nav-link">文档指南</a>
           <a href="/NextMeta/部署指南.html" class="nav-link">部署指南</a>
           <a href="/NextMeta/功能说明.html" class="nav-link">功能说明</a>
+          <a href="/NextMeta/功能说明.html#our-advantages" class="nav-link">我们的优势</a>
         </nav>
 
         <div class="nav-right">
