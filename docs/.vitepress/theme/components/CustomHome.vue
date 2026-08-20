@@ -161,9 +161,6 @@
             @mouseenter="activeFeature = index"
           >
             <div class="card-glow-bg"></div>
-            <div class="feature-icon-wrapper">
-              <span class="feature-emoji">{{ feature.icon }}</span>
-            </div>
             <h3 class="feature-title">{{ feature.title }}</h3>
             <p class="feature-desc">{{ feature.desc }}</p>
             <div class="feature-pill">{{ feature.tag }}</div>
@@ -213,25 +210,21 @@ const mouse = reactive({
 // 特性卡片数据
 const features = [
   {
-    icon: '🔍',
     title: '统一查询入口',
     desc: '多数据源集中管理，SQL 查询窗口内置安全限制，只读库自动拦截写操作。',
     tag: 'Query Console'
   },
   {
-    icon: '📋',
     title: '工单审批流',
     desc: 'DDL / DML 变更以工单形式提交，多级审批后方可执行，杜绝随意改库。',
     tag: 'Ticket Workflow'
   },
   {
-    icon: '🛡️',
     title: '权限与审计',
     desc: '基于角色的访问控制，禁用即时生效；全链路操作审计，变更可追溯。',
     tag: 'RBAC & Audit'
   },
   {
-    icon: '�',
     title: '一键 Docker 部署',
     desc: 'Go + React 技术栈，docker compose 一键拉起，内置 MySQL 初始化脚本。',
     tag: 'Self-Hosted'
@@ -1092,22 +1085,6 @@ onUnmounted(() => {
   border-color: rgba(99, 102, 241, 0.4);
   box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.25);
   background: rgba(15, 23, 42, 0.65);
-}
-
-.feature-icon-wrapper {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 18px;
-}
-
-.feature-emoji {
-  font-size: 1.35rem;
 }
 
 .feature-title {
