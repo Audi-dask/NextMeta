@@ -16,8 +16,3 @@
   --vp-c-brand-3: #60a5fa;
   --vp-button-brand-bg: #2563eb;
 }
-
-/* 首页使用自定义 3D 组件时隐藏默认 page 容器边距 */
-.VPDoc.has-sidebar {
-  padding-top: 0;
-}

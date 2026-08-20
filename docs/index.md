@@ -1,7 +1,3 @@
 ---
-layout: page
+layout: custom-home
 ---
-
-<ClientOnly>
-  <CustomHome />
-</ClientOnly>
