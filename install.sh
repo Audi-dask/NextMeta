@@ -32,6 +32,7 @@ fi
 echo ""
 echo "NextMeta is starting, open http://localhost:8080 when ready."
 echo "Default admin: NextMeta / password123 (change it after first login)."
+echo "Deploy guide: https://audi-dask.github.io/NextMeta/%E9%83%A8%E7%BD%B2%E6%8C%87%E5%8D%97.html"
 echo ""
 echo "[NOTE] The license file (license.lic) cannot be filled automatically."
 echo "       Please upload it manually via System Settings after the service is up."
