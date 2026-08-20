@@ -31,6 +31,12 @@ export default defineConfig({
           { text: '功能说明', link: '/功能说明' },
           { text: '数据脱敏机制', link: '/脱敏规则测试文档' }
         ]
+      },
+      {
+        text: '项目',
+        items: [
+          { text: '项目与社区', link: '/项目与社区' }
+        ]
       }
     ],
 
