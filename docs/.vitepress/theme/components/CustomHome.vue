@@ -820,6 +820,8 @@ onUnmounted(() => {
   font-size: clamp(1.4rem, 3.2vw, 2.2rem);
   font-weight: 700;
   letter-spacing: -0.01em;
+  line-height: 1.5;
+  padding: 0.12em 0;
   margin: 0 0 20px;
   background: linear-gradient(to right, #f8fafc, #94a3b8);
   -webkit-background-clip: text;
