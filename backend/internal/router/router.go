@@ -30,6 +30,7 @@ func InitRouter(
 	oauthHandler *v1.OAuthHandler,
 	loginAuditHandler *v1.LoginAuditHandler,
 	licenseSvc service.LicenseService,
+	userService service.UserService,
 ) *gin.Engine {
 	r := gin.New()
 
@@ -52,7 +53,7 @@ func InitRouter(
 		auth := api.Group("/auth")
 		{
 			// 注册接口仅允许管理员调用，避免生产环境开放任意用户自注册。
-			auth.POST("/register", JWTAuth(), AdminOnly(), userHandler.Register)
+			auth.POST("/register", JWTAuth(userService), AdminOnly(), userHandler.Register)
 			auth.POST("/login", userHandler.Login)
 			auth.POST("/refresh", userHandler.RefreshToken)
 
@@ -66,14 +67,14 @@ func InitRouter(
 
 		// 首页看板接口需要登录后访问，用于返回系统概览统计数据。
 		dashboard := api.Group("/dashboard")
-		dashboard.Use(JWTAuth())
+		dashboard.Use(JWTAuth(userService))
 		{
 			dashboard.GET("/stats", dashboardHandler.GetStats)
 		}
 
 		// 审核规则接口允许登录用户查看规则，规则状态和配置修改仅限管理员。
 		rules := api.Group("/rules")
-		rules.Use(JWTAuth())
+		rules.Use(JWTAuth(userService))
 		{
 			rules.GET("", auditRuleHandler.ListRules)
 			rules.PUT("/:id/status", AdminOnly(), auditRuleHandler.UpdateRuleStatus)
@@ -81,7 +82,7 @@ func InitRouter(
 		}
 
 		user := api.Group("/user")
-		user.Use(JWTAuth())
+		user.Use(JWTAuth(userService))
 		{
 			user.GET("/profile", userHandler.GetProfile)
 			user.PUT("/profile", userHandler.UpdateProfile)
@@ -97,7 +98,7 @@ func InitRouter(
 
 		// 用户组接口维护组基础信息，以及成员、数据源、审批人三类关联关系。
 		groups := api.Group("/groups")
-		groups.Use(JWTAuth())
+		groups.Use(JWTAuth(userService))
 		{
 			groups.GET("", AdminOnly(), groupHandler.ListAll)
 			groups.POST("", AdminOnly(), groupHandler.Create)
@@ -117,7 +118,7 @@ func InitRouter(
 		// 数据源接口覆盖数据源 CRUD、连接测试、库表元数据读取和查询窗口 SQL 执行。
 		// License 失效时（未上传/过期/验签失败）整组拒绝访问，保证 SQL 执行入口与授权状态强绑定。
 		ds := api.Group("/datasources")
-		ds.Use(JWTAuth(), LicenseGuardForDataSource(licenseSvc))
+		ds.Use(JWTAuth(userService), LicenseGuardForDataSource(licenseSvc))
 		{
 			ds.POST("", AdminOnly(), dsHandler.Create)
 			ds.PUT("", AdminOnly(), dsHandler.Update)
@@ -134,7 +135,7 @@ func InitRouter(
 		// 工单接口负责 SQL 工单创建、语法检测、审批流、列表查询和执行结果导出。
 		// 工单提交和审批最终会触发数据源上的 SQL，License 失效时同样整组拒绝。
 		tickets := api.Group("/tickets")
-		tickets.Use(JWTAuth(), LicenseGuardForDataSource(licenseSvc))
+		tickets.Use(JWTAuth(userService), LicenseGuardForDataSource(licenseSvc))
 		{
 			tickets.POST("", ticketHandler.CreateTicket)
 			tickets.POST("/check-syntax", ticketHandler.CheckSyntax)
@@ -152,7 +153,7 @@ func InitRouter(
 
 		// 审计日志接口当前主要面向管理员查询 SQL 查询窗口产生的审计记录。
 		audit := api.Group("/audit")
-		audit.Use(JWTAuth())
+		audit.Use(JWTAuth(userService))
 		{
 			audit.GET("/query-logs", AdminOnly(), auditHandler.GetQueryAuditLogs)
 		}
@@ -160,7 +161,7 @@ func InitRouter(
 		// 系统设置接口用于读取和更新通知等运行配置，修改和测试通知仅限管理员。
 		// License 相关接口刻意不挂 LicenseGuard，保证授权失效时管理员仍能查看状态并上传新 license。
 		settings := api.Group("/settings")
-		settings.Use(JWTAuth())
+		settings.Use(JWTAuth(userService))
 		{
 			settings.GET("", AdminOnly(), systemSettingHandler.List)
 			settings.PUT("", AdminOnly(), systemSettingHandler.Update)
@@ -178,14 +179,14 @@ func InitRouter(
 
 		// 登录审计
 		loginAudit := api.Group("/login-audit")
-		loginAudit.Use(JWTAuth())
+		loginAudit.Use(JWTAuth(userService))
 		{
 			loginAudit.GET("", AdminOnly(), loginAuditHandler.List)
 		}
 
 		// SQL 片段接口提供用户常用 SQL 片段的新增、查询、更新和删除能力。
 		snippets := api.Group("/snippets")
-		snippets.Use(JWTAuth())
+		snippets.Use(JWTAuth(userService))
 		{
 			snippets.POST("", snippetHandler.Create)
 			snippets.GET("", snippetHandler.List)

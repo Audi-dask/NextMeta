@@ -177,6 +177,7 @@ func main() {
 		oauthHandler,
 		loginAuditHandler,
 		licenseSvc,
+		userService,
 	)
 
 	ldapSyncSvc.Start(context.Background())

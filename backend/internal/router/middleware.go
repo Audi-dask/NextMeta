@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"nextmeta-backend/internal/model"
+	"nextmeta-backend/internal/service"
 	"nextmeta-backend/pkg/jwt"
 	"nextmeta-backend/pkg/logger"
 	"nextmeta-backend/pkg/response"
@@ -83,7 +84,7 @@ JWTAuth 返回 JWT 鉴权中间件。
 它从 Authorization 请求头读取 Bearer Token，解析成功后把用户 ID、用户名和角色
 写入 gin.Context，供后续 Handler 或权限中间件继续使用。
 */
-func JWTAuth() gin.HandlerFunc {
+func JWTAuth(userService service.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -106,9 +107,22 @@ func JWTAuth() gin.HandlerFunc {
 			return
 		}
 
+		// 校验 token 归属用户是否仍然有效，确保禁用后已签发的 token 立即失效。
+		user, err := userService.GetByID(claims.UserID)
+		if err != nil || user == nil {
+			response.FailWithStatus(c, http.StatusUnauthorized, response.CodeError, "User not found")
+			c.Abort()
+			return
+		}
+		if user.Status != "" && user.Status != "enabled" {
+			response.FailWithStatus(c, http.StatusUnauthorized, response.CodeError, "User disabled")
+			c.Abort()
+			return
+		}
+
 		c.Set("userID", claims.UserID)
 		c.Set("username", claims.Username)
-		c.Set("role", claims.Role)
+		c.Set("role", user.Role) // 使用查库得到的最新角色覆盖 token 快照，让角色变更即时生效。
 		c.Next()
 	}
 }

@@ -171,6 +171,22 @@ func (h *UserHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
+	// 续期前校验用户是否仍有效，避免被禁用用户通过 refresh token 持续保持登录态。
+	claims, err := jwt.ParseToken(req.RefreshToken)
+	if err != nil {
+		response.FailWithStatus(c, http.StatusUnauthorized, response.CodeError, "Invalid or expired refresh token")
+		return
+	}
+	user, err := h.userService.GetByID(claims.UserID)
+	if err != nil || user == nil {
+		response.FailWithStatus(c, http.StatusUnauthorized, response.CodeError, "User not found")
+		return
+	}
+	if user.Status != "" && user.Status != "enabled" {
+		response.FailWithStatus(c, http.StatusUnauthorized, response.CodeError, "User disabled")
+		return
+	}
+
 	tokens, err := jwt.RefreshToken(req.RefreshToken)
 	if err != nil {
 		response.FailWithStatus(c, http.StatusUnauthorized, response.CodeError, "Invalid or expired refresh token")
