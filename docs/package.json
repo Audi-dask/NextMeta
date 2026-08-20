@@ -7,6 +7,10 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
+    "@types/three": "^0.185.4",
     "vitepress": "^1.6.3"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
   }
 }

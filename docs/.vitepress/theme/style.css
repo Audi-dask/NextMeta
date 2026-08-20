@@ -8,11 +8,6 @@
   --vp-button-brand-bg: #2563eb;
   --vp-button-brand-hover-bg: #1d4ed8;
   --vp-button-brand-active-bg: #1e40af;
-
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(120deg, #2563eb 30%, #60a5fa);
-  --vp-home-hero-image-background-image: linear-gradient(-45deg, rgba(37, 99, 235, 0.2) 50%, rgba(96, 165, 250, 0.2) 50%);
-  --vp-home-hero-image-filter: blur(48px);
 }
 
 .dark {
@@ -20,4 +15,9 @@
   --vp-c-brand-2: #3b82f6;
   --vp-c-brand-3: #60a5fa;
   --vp-button-brand-bg: #2563eb;
+}
+
+/* 首页使用自定义 3D 组件时隐藏默认 page 容器边距 */
+.VPDoc.has-sidebar {
+  padding-top: 0;
 }
