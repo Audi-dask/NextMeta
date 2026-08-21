@@ -1,6 +1,6 @@
 services:
   nextmeta:
-    image: ccr.ccs.tencentyun.com/dbak/nextmeta:v2.0.5
+    image: ccr.ccs.tencentyun.com/dbak/nextmeta:latest
     container_name: nextmeta
     restart: unless-stopped
     ports:
