@@ -24,6 +24,27 @@ curl -fsSL https://raw.githubusercontent.com/Audi-dask/NextMeta/main/install.sh 
 
 启动后访问 `http://localhost:8080`，默认管理员 `NextMeta / password123`（登录后请立即修改）。
 
+## 路线图
+
+### 阶段一：查询 + 静态审核
+
+- 接入 PG 驱动 + PG 方言 SQL 解析器
+- 数据源支持「类型」与「连接 database」字段，DSN / 连接按类型分流
+- 元数据采集适配 PG（schema 列表、字段、主键）
+- SQL 解析与语句识别适配 PG（SELECT 判断、LIMIT 注入）
+- 静态审核规则拆分为通用 / MySQL / PG 三套，按类型启用
+- 前端对齐：编辑器方言、库表树、数据源类型选择、路由菜单
+- 查询链路端到端验证
+
+### 阶段二：工单 + 动态审核 + EXPLAIN + 脱敏
+
+- 动态审核规则 + 元数据采集适配 PG（pg_catalog）
+- EXPLAIN 适配（PG `EXPLAIN (FORMAT JSON)`）
+- 超时（`statement_timeout`）与错误码（SQLSTATE）适配
+- 脱敏血缘适配 PG AST
+- DDL/DML 工单全流程验证
+- 测试与文档同步
+
 ## 免责声明
 
 > 由 NextMeta 以及其他第三方二次开发所产生的一切后果，NextMeta 作者本人不负一切责任！
