@@ -175,6 +175,7 @@ func InitRouter(
 			settings.POST("/test-notify", AdminOnly(), systemSettingHandler.TestNotify)
 			settings.GET("/license", AdminOnly(), systemSettingHandler.GetLicense)
 			settings.POST("/license", AdminOnly(), systemSettingHandler.UploadLicense)
+			settings.POST("/cleanup", AdminOnly(), systemSettingHandler.CleanupHistory)
 		}
 
 		// 登录审计

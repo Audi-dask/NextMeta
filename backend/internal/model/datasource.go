@@ -11,7 +11,7 @@ DataSource 是 MySQL 数据源模型。
 type DataSource struct {
 	gorm.Model
 	Name                string                  `gorm:"column:name;type:varchar(100);not null;comment:数据源名称" json:"name"`
-	Type                string                  `gorm:"column:type;type:varchar(20);not null;comment:数据库类型(MySQL)" json:"type"`
+	Type                string                  `gorm:"column:type;type:varchar(20);not null;comment:数据库类型" json:"type"`
 	Host                string                  `gorm:"column:host;type:varchar(255);not null;comment:主机地址" json:"host"`
 	Port                int                     `gorm:"column:port;type:int;not null;comment:端口" json:"port"`
 	Database            string                  `gorm:"column:database;type:varchar(100);comment:数据库名" json:"database"`

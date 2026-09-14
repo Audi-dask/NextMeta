@@ -48,7 +48,9 @@ FindQueryLogs 返回带查询会话 ID 的查询窗口审计日志。
 */
 func (r *auditLogRepository) FindQueryLogs() ([]model.AuditLog, error) {
 	var logs []model.AuditLog
-	err := r.db.Preload("User").
+	err := r.db.Preload("User", func(db *gorm.DB) *gorm.DB {
+		return db.Unscoped()
+	}).
 		Where("action = ? AND query_session_id <> ''", "Query").
 		Order("created_at ASC").
 		Order("id ASC").

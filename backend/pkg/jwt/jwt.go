@@ -35,12 +35,20 @@ type TokenPair struct {
 
 /*
 Configure 设置 JWT 签名密钥、access token 和 refresh token 的有效期。
-服务启动时会根据 config.yaml 中的 JWT 配置调用该函数。
+服务启动时会根据 config.yaml 中的 JWT 配置调用该函数；参数非法时返回错误，由启动入口中止服务。
 */
-func Configure(secretKey string, expires, refresh time.Duration) {
+func Configure(secretKey string, expires, refresh time.Duration) error {
+	if secretKey == "" {
+		return errors.New("jwt secret is required")
+	}
+	if expires <= 0 || refresh <= 0 {
+		return errors.New("jwt expires and refresh must be positive")
+	}
+
 	SecretKey = []byte(secretKey)
 	accessExpires = expires
 	refreshExpires = refresh
+	return nil
 }
 
 /*

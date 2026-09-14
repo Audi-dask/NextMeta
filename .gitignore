@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+*.profraw
 
 # VitePress dev cache
 docs/.vitepress/cache/
@@ -41,4 +42,7 @@ backend/internal/model/audit_rule.go
 
 # Closed-source license asset
 license.lic
+
+# Local runtime config (contains real DB password and JWT secret)
+backend/config.yaml
 

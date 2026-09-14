@@ -35,15 +35,15 @@ func NewSnippetService(repo repository.SnippetRepository) SnippetService {
 
 /*
 CreateSnippet 创建当前用户的 SQL 片段。
-创建前会限制每个用户最多保存 10 条片段，避免无限增长。
+创建前会限制每个用户最多保存 50 条片段，避免无限增长。
 */
 func (s *snippetService) CreateSnippet(userID uint, title, content string) error {
 	count, err := s.repo.CountByUserID(userID)
 	if err != nil {
 		return err
 	}
-	if count >= 10 {
-		return errors.New("最多只能保存 10 条 SQL 片段")
+	if count >= 50 {
+		return errors.New("最多只能保存 50 条 SQL 片段")
 	}
 
 	snippet := &model.SQLSnippet{

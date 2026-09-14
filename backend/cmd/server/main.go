@@ -3,13 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"nextmeta-backend/configs"
 	v1 "nextmeta-backend/internal/api/v1"
+	"nextmeta-backend/internal/datasource"
 	"nextmeta-backend/internal/license"
 	"nextmeta-backend/internal/model"
 	"nextmeta-backend/internal/repository"
@@ -44,7 +45,7 @@ func resolveLicensePath() string {
 }
 
 // @title           NextMeta API
-// @version         2.0.2
+// @version         v2.1.0
 // @description     NextMeta SQL Audit Platform API
 
 /*
@@ -52,42 +53,52 @@ func resolveLicensePath() string {
 数据库可用性检查、GORM 连接创建、Repository/Service/Handler 依赖注入，
 最后注册 Gin 路由并监听配置文件中的服务端口。
 */
-func main() {
+func exitWithError(event string, err error, fields ...zap.Field) {
+	fields = append(fields, zap.Error(err))
+	logger.Log.Error(event, fields...)
+	_ = logger.Log.Sync()
+	os.Exit(1)
+}
 
-	// 1. 初始化配置
-	cfg := configs.LoadConfig()
+func main() {
+	// 1. 初始化日志
+	logger.InitLogger()
+	defer func() {
+		_ = logger.Log.Sync()
+	}()
+
+	// 2. 初始化配置
+	cfg, err := configs.LoadConfig()
+	if err != nil {
+		exitWithError("config_load_failed", err)
+	}
 
 	jwtCfg := cfg.JWT
-	jwt.Configure(jwtCfg.SecretKey, jwtCfg.ExpiresDuration, jwtCfg.RefreshExpiresDuration)
-
-	// 2. 初始化日志
-	logger.InitLogger()
-	defer logger.Log.Sync()
+	if err := jwt.Configure(jwtCfg.Secret, time.Duration(jwtCfg.Expires)*time.Minute, time.Duration(jwtCfg.Refresh)*time.Minute); err != nil {
+		exitWithError("jwt_configure_failed", err)
+	}
 
 	// 3. 初始化数据库
-	dsn := cfg.Database.GetDSN()
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		cfg.Database.User, cfg.Database.Password, cfg.Database.Host, cfg.Database.Port, cfg.Database.DBName)
 	if err := ensureDatabaseExists(cfg.Database); err != nil {
-		logger.Log.Error("数据库不存在或不可访问", zap.Error(err))
-		log.Fatal(err)
+		exitWithError("database_validation_failed", err)
 	}
 
 	db, err := gorm.Open(mysql.Open(dsn), logger.GormConfig())
 	if err != nil {
-		logger.Log.Error("连接数据库失败，请检查配置文件 configs/config.go", zap.Error(err))
-		log.Fatal(err)
+		exitWithError("database_connection_failed", err)
 	}
 	if !db.Migrator().HasColumn(&model.SQLTicket{}, "StatementResults") {
 		if err := db.Migrator().AddColumn(&model.SQLTicket{}, "StatementResults"); err != nil {
-			logger.Log.Error("新增逐语句执行结果字段失败", zap.Error(err))
-			log.Fatal(err)
+			exitWithError("database_migration_failed", err, zap.String("column", "statement_results"))
 		}
 	}
 
 	// 4. 初始化应用层 (依赖注入)
 	licenseSvc, err := service.NewLicenseService(license.EmbeddedPublicKeyPEM, resolveLicensePath())
 	if err != nil {
-		logger.Log.Error("初始化 License Service 失败", zap.Error(err))
-		log.Fatal(err)
+		exitWithError("license_service_initialization_failed", err)
 	}
 
 	userRepo := repository.NewUserRepository(db)
@@ -111,7 +122,7 @@ func main() {
 	groupHandler := v1.NewGroupHandler(groupService)
 
 	dsRepo := repository.NewDataSourceRepository(db)
-	dsService := service.NewDataSourceService(dsRepo, settingsRepo)
+	dsService := service.NewDataSourceService(dsRepo, settingsRepo, datasource.DefaultRegistry)
 	auditLogRepo := repository.NewAuditLogRepository(db)
 	auditLogService := service.NewAuditLogService(auditLogRepo)
 	auditLogHandler := v1.NewAuditLogHandler(auditLogService)
@@ -135,11 +146,10 @@ func main() {
 	const interruptedExecutionReason = "服务在工单执行期间重启，无法确认 SQL 最终执行状态，请人工核对数据库后处理"
 	recoveredCount, err := ticketRepo.FailExecutingTickets(interruptedExecutionReason)
 	if err != nil {
-		logger.Log.Error("恢复遗留执行中工单失败", zap.Error(err))
-		log.Fatal(err)
+		exitWithError("ticket_recovery_failed", err)
 	}
 	if recoveredCount > 0 {
-		logger.Log.Warn("已将遗留执行中工单标记为失败", zap.Int64("count", recoveredCount))
+		logger.Log.Warn("interrupted_tickets_recovered", zap.Int64("count", recoveredCount))
 	}
 	ticketService := service.NewTicketService(ticketRepo, userRepo, permRepo, permService, dsService, auditLogService, settingsRepo, auditService, notificationSvc)
 	ticketHandler := v1.NewTicketHandler(ticketService, auditService)
@@ -150,7 +160,11 @@ func main() {
 	// 审计规则 Handler
 	auditRuleHandler := v1.NewAuditRuleHandler(baseRepo)
 
-	systemSettingHandler := v1.NewSystemSettingHandler(settingsRepo, ldapSvc, ldapSyncSvc, notificationSvc, licenseSvc, ldapConfigRepo, feishuConfigRepo, userRepo)
+	// 历史数据清理服务
+	cleanupRepo := repository.NewCleanupRepository(db)
+	cleanupSvc := service.NewCleanupService(cleanupRepo)
+
+	systemSettingHandler := v1.NewSystemSettingHandler(settingsRepo, ldapSvc, ldapSyncSvc, notificationSvc, licenseSvc, ldapConfigRepo, feishuConfigRepo, userRepo, cleanupSvc)
 
 	snippetExpo := repository.NewSnippetRepository(db)
 	snippetSvc := service.NewSnippetService(snippetExpo)
@@ -182,9 +196,9 @@ func main() {
 
 	ldapSyncSvc.Start(context.Background())
 
-	logger.Log.Info("服务监听端口" + cfg.Server.Port)
+	logger.Log.Info("server_starting", zap.String("address", cfg.Server.Port))
 	if err := r.Run(cfg.Server.Port); err != nil {
-		log.Fatal("服务启动失败: ", err)
+		exitWithError("server_start_failed", err)
 	}
 }
 

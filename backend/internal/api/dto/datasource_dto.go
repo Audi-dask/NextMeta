@@ -58,6 +58,7 @@ TestDataSourceConnectionRequest 是前端在保存前测试连接时提交的请
 该结构只用于临时连接测试，不会直接写入数据库。
 */
 type TestDataSourceConnectionRequest struct {
+	Type     string `json:"type"`
 	Host     string `json:"host" binding:"required"`
 	Port     int    `json:"port" binding:"required"`
 	Database string `json:"database"`

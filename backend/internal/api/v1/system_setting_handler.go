@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"nextmeta-backend/internal/api/dto"
 	"nextmeta-backend/internal/license"
@@ -29,6 +30,7 @@ type SystemSettingHandler struct {
 	ldapConfigRepo   repository.LdapConfigRepository
 	feishuConfigRepo repository.FeishuConfigRepository
 	userRepo         repository.UserRepository
+	cleanupSvc       service.CleanupService
 }
 
 /*
@@ -45,6 +47,7 @@ func NewSystemSettingHandler(
 	ldapConfigRepo repository.LdapConfigRepository,
 	feishuConfigRepo repository.FeishuConfigRepository,
 	userRepo repository.UserRepository,
+	cleanupSvc service.CleanupService,
 ) *SystemSettingHandler {
 	return &SystemSettingHandler{
 		repo:             repo,
@@ -55,6 +58,7 @@ func NewSystemSettingHandler(
 		ldapConfigRepo:   ldapConfigRepo,
 		feishuConfigRepo: feishuConfigRepo,
 		userRepo:         userRepo,
+		cleanupSvc:       cleanupSvc,
 	}
 }
 
@@ -251,6 +255,40 @@ func (h *SystemSettingHandler) Update(c *gin.Context) {
 	}
 
 	response.Success(c, nil)
+}
+
+/*
+CleanupHistory 物理删除指定日期之前的历史数据。
+请求体 date 使用 YYYY-MM-DD 格式，删除 created_at 早于该日 00:00:00 的
+工单审批、工单和查询审计记录。该操作不可逆，仅限管理员调用。
+*/
+func (h *SystemSettingHandler) CleanupHistory(c *gin.Context) {
+	var req struct {
+		Date string `json:"date" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, response.CodeInvalidParam, err.Error())
+		return
+	}
+
+	cutoff, err := time.ParseInLocation("2006-01-02", req.Date, time.Local)
+	if err != nil {
+		response.Fail(c, response.CodeInvalidParam, "日期格式错误，请使用 YYYY-MM-DD")
+		return
+	}
+
+	if h.cleanupSvc == nil {
+		response.Fail(c, response.CodeError, "cleanup service is not initialized")
+		return
+	}
+
+	result, err := h.cleanupSvc.PurgeBefore(cutoff)
+	if err != nil {
+		response.Fail(c, response.CodeError, err.Error())
+		return
+	}
+
+	response.Success(c, result)
 }
 
 /*

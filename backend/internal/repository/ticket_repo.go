@@ -64,7 +64,12 @@ FindByID 按主键查询工单详情。
 */
 func (r *ticketRepository) FindByID(id uint) (*model.SQLTicket, error) {
 	var ticket model.SQLTicket
-	err := r.db.Preload("Creator").Preload("Approver").Preload("Approvals.Approver").Preload("DataSource").Preload("Executor").First(&ticket, id).Error
+	err := r.db.Preload("Creator", func(db *gorm.DB) *gorm.DB { return db.Unscoped() }).
+		Preload("Approver", func(db *gorm.DB) *gorm.DB { return db.Unscoped() }).
+		Preload("Approvals.Approver", func(db *gorm.DB) *gorm.DB { return db.Unscoped() }).
+		Preload("DataSource").
+		Preload("Executor", func(db *gorm.DB) *gorm.DB { return db.Unscoped() }).
+		First(&ticket, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -74,10 +79,10 @@ func (r *ticketRepository) FindByID(id uint) (*model.SQLTicket, error) {
 func (r *ticketRepository) listQuery() *gorm.DB {
 	return r.db.Model(&model.SQLTicket{}).
 		Select("sql_tickets.id", "sql_tickets.created_at", "sql_tickets.updated_at", "sql_tickets.creator_id", "sql_tickets.approver_id", "sql_tickets.data_source_id", "sql_tickets.database", "sql_tickets.title", "sql_tickets.ticket_type", "sql_tickets.is_force", "sql_tickets.status", "sql_tickets.executor_id", "sql_tickets.executor_name", "sql_tickets.executed_at").
-		Preload("Creator", func(db *gorm.DB) *gorm.DB { return db.Select("id", "username", "real_name") }).
-		Preload("Approver", func(db *gorm.DB) *gorm.DB { return db.Select("id", "username", "real_name") }).
+		Preload("Creator", func(db *gorm.DB) *gorm.DB { return db.Unscoped().Select("id", "username", "real_name") }).
+		Preload("Approver", func(db *gorm.DB) *gorm.DB { return db.Unscoped().Select("id", "username", "real_name") }).
 		Preload("DataSource", func(db *gorm.DB) *gorm.DB { return db.Select("id", "name", "environment") }).
-		Preload("Executor", func(db *gorm.DB) *gorm.DB { return db.Select("id", "username", "real_name") })
+		Preload("Executor", func(db *gorm.DB) *gorm.DB { return db.Unscoped().Select("id", "username", "real_name") })
 }
 
 /*
@@ -297,7 +302,10 @@ limit 控制返回数量，首页看板当前使用该方法展示最近工单�
 */
 func (r *ticketRepository) FindRecent(limit int) ([]model.SQLTicket, error) {
 	var tickets []model.SQLTicket
-	err := r.db.Preload("Creator").Preload("Approver").Preload("DataSource").Preload("Executor").
+	err := r.db.Preload("Creator", func(db *gorm.DB) *gorm.DB { return db.Unscoped() }).
+		Preload("Approver", func(db *gorm.DB) *gorm.DB { return db.Unscoped() }).
+		Preload("DataSource").
+		Preload("Executor", func(db *gorm.DB) *gorm.DB { return db.Unscoped() }).
 		Order("created_at DESC").
 		Limit(limit).
 		Find(&tickets).Error

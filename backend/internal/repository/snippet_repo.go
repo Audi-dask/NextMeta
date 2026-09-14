@@ -73,7 +73,7 @@ func (r *snippetRepository) Delete(id uint, userID uint) error {
 
 /*
 CountByUserID 统计指定用户已有的 SQL 片段数量。
-service 层会用该数量限制单个用户最多保存 10 条片段。
+service 层会用该数量限制单个用户最多保存 50 条片段。
 */
 func (r *snippetRepository) CountByUserID(userID uint) (int64, error) {
 	var count int64
