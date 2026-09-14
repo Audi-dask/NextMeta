@@ -46,3 +46,7 @@ license.lic
 # Local runtime config (contains real DB password and JWT secret)
 backend/config.yaml
 
+# Compiled server binary (published as a Release asset, not tracked here)
+nextmeta-server
+nextmeta-server-*
+
